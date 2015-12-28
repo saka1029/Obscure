@@ -3,10 +3,10 @@ package obscure.syntax;
 import obscure.core.Env;
 import obscure.core.Obj;
 import obscure.core.Symbol;
-import obscure.core.Syntax;
+import obscure.core.Applicable;
 import obscure.primitive.Closure;
 
-public class Define extends Syntax {
+public class Define extends Applicable {
 
     @Override
     public Obj apply(Obj args, Env env) {

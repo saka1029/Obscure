@@ -3,9 +3,9 @@ package obscure.syntax;
 import obscure.core.Env;
 import obscure.core.Nil;
 import obscure.core.Obj;
-import obscure.core.Syntax;
+import obscure.core.Applicable;
 
-public class Instance extends Syntax {
+public class Instance extends Applicable {
     
     private final Env env;
     

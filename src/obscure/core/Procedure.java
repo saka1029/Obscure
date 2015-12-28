@@ -1,13 +1,7 @@
 package obscure.core;
 
-public abstract class Procedure extends Obj {
+public abstract class Procedure extends Applicable {
 
-    Obj evlis(Obj args, Env env) {
-        Pair.Builder b = Pair.builder();
-        for (; args.isPair(); args = args.cdr())
-            b.tail(args.car().eval(env));
-        return b.build();
-    }
 
     public abstract Obj apply(Obj args);
 
@@ -15,4 +9,6 @@ public abstract class Procedure extends Obj {
     public Obj apply(Obj args, Env env) {
         return apply(evlis(args, env));
     }
+
+
 }

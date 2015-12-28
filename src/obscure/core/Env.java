@@ -5,6 +5,7 @@ import java.util.Map;
 
 import obscure.primitive.*;
 import obscure.syntax.*;
+import obscure.syntax.Class;
 
 public abstract class Env {
 
@@ -16,9 +17,9 @@ public abstract class Env {
         GLOBAL.put(Symbol.of("cons"), new Cons());
         GLOBAL.put(Symbol.of("equals"), new Equals());
         GLOBAL.put(Symbol.of("list"), new List());
+        GLOBAL.put(Symbol.of("class"), new Class());
         GLOBAL.put(Symbol.of("define"), new Define());
         GLOBAL.put(Symbol.of("lambda"), new Lambda());
-        GLOBAL.put(Symbol.of("new"), new New());
         GLOBAL.put(Symbol.of("quote"), new Quote());
         GLOBAL.put(Symbol.of("set"), new Set());
     }
@@ -96,7 +97,11 @@ class Mapped extends Env {
 
     @Override
     public String toString() {
-        return map.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(map);
+        if (previous != null)
+            sb.append(" -> ").append(previous);
+        return sb.toString();
     }
 
 }
@@ -121,6 +126,11 @@ class Compound extends Env {
     @Override
     protected void put(Symbol key, Obj value) {
         first.put(key, value);
+    }
+    
+    @Override
+    public String toString() {
+        return first.toString() + second;
     }
 
 }

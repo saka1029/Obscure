@@ -165,10 +165,10 @@ public class TestObscure {
     }
 
     @Test
-    public void testNew() throws IOException {
+    public void testClass() throws IOException {
         Env env = Env.create();
         testEval("who", "(define name 'who)", env);
-        read("(define (Person name) (define (greeting x) (list x name)) (new))").eval(env);
+        read("(class (Person name) (define (greeting x) (list x name)))").eval(env);
         read("(define jhon (Person 'JhonDoe))").eval(env);
         testEval("JhonDoe", "(jhon name)", env);
         testEval("JhonLennon", "(jhon (set name 'JhonLennon))", env);

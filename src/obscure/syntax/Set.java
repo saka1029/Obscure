@@ -4,9 +4,9 @@ import obscure.core.Env;
 import obscure.core.Obj;
 import obscure.core.ObscureException;
 import obscure.core.Symbol;
-import obscure.core.Syntax;
+import obscure.core.Applicable;
 
-public class Set extends Syntax {
+public class Set extends Applicable {
 
     @Override
     public Obj apply(Obj args, Env env) {
