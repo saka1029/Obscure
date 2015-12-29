@@ -168,13 +168,15 @@ public class TestObscure {
     public void testClass() throws IOException {
         Env env = Env.create();
         testEval("who", "(define name 'who)", env);
-        read("(class (Person name) (define (greeting x) (list x name)))").eval(env);
+        read("(define (Person name) (define (greeting x) (list x name)) (new))").eval(env);
         read("(define jhon (Person 'JhonDoe))").eval(env);
         testEval("JhonDoe", "(jhon name)", env);
         testEval("JhonLennon", "(jhon (set name 'JhonLennon))", env);
         testEval("JhonLennon", "(jhon name)", env);
         testEval("(Hello JhonLennon)", "(jhon (greeting 'Hello))", env);
         testEval("who", "name", env);
+        read("(define w (Person name))").eval(env);
+        testEval("who", "(w name)", env);
     }
 
     @Test(expected = ObscureException.class)
