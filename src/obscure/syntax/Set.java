@@ -10,8 +10,8 @@ public class Set extends Applicable {
 
     @Override
     public Obj apply(Obj args, Env env) {
-        if (args.car().isSymbol())
-            return env.replace((Symbol)args.car(), args.cdr().car().eval(env));
-        throw new ObscureException("set: first argument must be symbol %s", args);
+        if (!args.car().isSymbol())
+            throw new ObscureException("set: first argument must be symbol %s", args);
+        return env.replace((Symbol)args.car(), args.cdr().car().eval(env));
     }
 }

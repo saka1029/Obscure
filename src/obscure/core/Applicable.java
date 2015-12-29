@@ -13,9 +13,9 @@ public abstract class Applicable extends Obj {
         Obj p = parms;
         for (; p.isPair(); p = p.cdr())
             if (!p.car().isSymbol())
-                throw new ObscureException("parameters must be symbol: %s", parms);
+                throw new ObscureException("parameters must be symbol: %s in %s", p.car(), parms);
         if (p != Nil.value && !p.isSymbol())
-            throw new ObscureException("parameters must be symbol: %s", parms);
+            throw new ObscureException("parameters must be symbol: %s in %s", p, parms);
     }
 
     public static Env pairlis(Obj parms, Obj args, Env env) {
