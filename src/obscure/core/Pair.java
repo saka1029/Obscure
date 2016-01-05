@@ -1,36 +1,27 @@
 package obscure.core;
 
-public class Pair extends Obj {
+public class Pair implements List {
 
-    private Obj car, cdr;
+    Object car;
+    Object cdr;
     
-    private Pair(Obj car, Obj cdr) {
+    private Pair(Object car, Object cdr) {
         this.car = car;
         this.cdr = cdr;
     }
     
-    @Override public Obj car() { return car; }
-    @Override public Obj cdr() { return cdr; }
-    @Override public boolean isPair() { return true; }
+    public static boolean isPair(Object o) { return o instanceof Pair; }
+    public static Pair asPair(Object o) { return ((Pair)o); }
     
-    public static Pair of(Obj car, Obj cdr) {
+    public static Pair of(Object car, Object cdr) {
         return new Pair(car, cdr);
     }
 
-    static Obj list(Obj... args) {
+    static List list(Object... args) {
         Builder b = new Builder();
-        for (Obj e : args)
+        for (Object e : args)
             b.tail(e);
         return b.build();
-    }
-    
-    public static Builder builder() {
-        return new Builder();
-    }
-    
-    @Override
-    public Obj eval(Env env) {
-        return car.eval(env).apply(cdr, env);
     }
     
     @Override
@@ -43,14 +34,14 @@ public class Pair extends Obj {
     
     @Override
     public String toString() {
-        if (car == Symbol.QUOTE && cdr.isPair() && cdr.cdr() == Nil.value)
-            return "'" + cdr.car();
+        if (car == Symbol.QUOTE && isPair(cdr) && asPair(cdr).cdr == Nil.value)
+            return "'" + asPair(cdr).car;
         StringBuilder sb = new StringBuilder();
         sb.append("(");
-        Obj e = this;
+        Object e = this;
         String sep = "";
-        for (; e.isPair(); e = e.cdr()) {
-            sb.append(sep).append(e.car());
+        for (; isPair(e); e = asPair(e).cdr) {
+            sb.append(sep).append(asPair(e).car);
             sep = " ";
         }
         if (e != Nil.value)
@@ -61,10 +52,10 @@ public class Pair extends Obj {
     
     public static class Builder {
 
-        Obj head = Nil.value;
-        Obj tail = Nil.value;
+        List head = Nil.value;
+        List tail = Nil.value;
 
-        public Builder head(Obj e) {
+        public Builder head(Object e) {
             if (head == Nil.value)
                 head = tail = new Pair(e, Nil.value);
             else
@@ -72,30 +63,80 @@ public class Pair extends Obj {
             return this;
         }
         
-        public Builder tail(Obj e) {
+        public Builder tail(Object e) {
+            Pair n = new Pair(e, Nil.value);
             if (tail == Nil.value)
-                head = tail = new Pair(e, Nil.value);
-            else
-                tail = ((Pair)tail).cdr = new Pair(e, Nil.value);
+                head = tail = n;
+            else {
+                asPair(tail).cdr = n;
+                tail = n;
+            }
             return this;
         }
         
-        public Obj tail() {
+        public List tail() {
             return tail;
         }
 
-        public Builder end(Obj e) {
+        public Builder end(Object e) {
             if (tail == Nil.value)
                 throw new ObscureException("cannot change end to %s", e);
-            ((Pair)tail).cdr = e;
+            asPair(tail).cdr = e;
             return this;
         }
         
-        public Obj build() {
-            Obj r = head;
+        public List build() {
+            List r = head;
             head = tail = null;
             return r;
         }
+    }
 
+    @Override public Object car() { return car; }
+    @Override public Object cdr() { return cdr; }
+    @Override public boolean isPair() { return true; }
+
+    public static List asList(Object object) {
+        return (List)object;
+    }
+
+    static Env ENV = Env.create();
+    static {
+        ENV.define(Symbol.of("car"), (Procedure)((self, args) -> asList(self).car()));
+        ENV.define(Symbol.of("cdr"), (Procedure)((self, args) -> asList(self).car()));
+    }
+
+    @Override public Object get(Symbol key) {
+        return ENV.get(key);
+    }
+
+    @Override
+    public Object set(Symbol key, Object value) {
+        return null;
+    }
+
+    @Override
+    public Object define(Symbol key, Object value) {
+        return null;
+    }
+
+    @Override
+    public Object eval(Env env) {
+        Object first = Global.eval(car, env);
+        if (first instanceof Applicable)
+            return ((Applicable)first).apply(env, asList(cdr), env);
+        if (!(cdr instanceof Pair))
+            throw new ObscureException("cannot eval %s", this);
+        Pair cdr = (Pair)this.cdr;
+        Object second = Global.eval(cdr.car, env);
+        Env self;
+        if (second instanceof Env)
+            self = (Env)second;
+        else
+            self = Global.wrap(second);
+        first = Global.eval(car, self);
+        if (!(first instanceof Applicable))
+            throw new ObscureException("cannot apply %s %s", first, cdr.cdr);
+        return ((Applicable)first).apply(second, asList(cdr.cdr), env);
     }
 }

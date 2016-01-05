@@ -8,5 +8,12 @@ public class ObscureException extends RuntimeException {
         super(String.format(format, args));
         System.err.printf(format + "%n", args);
     }
+    
+    public ObscureException(Throwable t) {
+        super(t);
+    }
+
+    public ObscureException() {
+    }
 
 }

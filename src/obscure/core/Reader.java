@@ -1,6 +1,7 @@
 package obscure.core;
 
 import java.io.IOException;
+import java.io.StringReader;
 
 public class Reader {
 
@@ -20,7 +21,7 @@ public class Reader {
         if (Character.isDigit(ch)) return false;
         if (ch <= ' ') return false;
         switch (ch) {
-            case '.': case ';':
+            case '?': case ';':
             case '"': case '\'':
             case '(': case ')':
             case '[': case ']':
@@ -32,8 +33,8 @@ public class Reader {
     
     static boolean isRestSymbol(int ch) {
         if (isFirstSymbol(ch)) return true;
-        if (isDigit(ch)) return true;
         if (ch == '.') return true;
+        if (isDigit(ch)) return true;
         return false;
     }
 
@@ -42,6 +43,10 @@ public class Reader {
     public Reader(java.io.Reader reader) throws IOException {
         this.reader = reader;
         get();
+    }
+    
+    public Reader(String s) throws IOException {
+        this(new StringReader(s));
     }
     
     int get() throws IOException {
@@ -53,9 +58,9 @@ public class Reader {
             get();
     }
     
-    Obj readList() throws IOException {
+    Object readList() throws IOException {
         get();
-        Pair.Builder b = Pair.builder();
+        Pair.Builder b = new Pair.Builder();
         while (true) {
             skipSpace();
             switch (ch) {
@@ -64,12 +69,12 @@ public class Reader {
                     return b.build();
                 case '.':
                     if (b.tail() == Nil.value)
-                        throw new ObscureException("reader: unexpected '.' after ')'");
+                        throw new ObscureException("unexpected '.' after '('");
                     get();
                     b.end(read());
                     skipSpace();
                     if (ch != ')')
-                        throw new ObscureException("reader: ')' expected");
+                        throw new ObscureException("')' expected");
                     get();
                     return b.build();
                 default:
@@ -79,30 +84,85 @@ public class Reader {
         }
     }
     
-    Obj readQuote() throws IOException {
+    Object readQuote() throws IOException {
         get();
         return Pair.list(Symbol.QUOTE, read());
     }
     
-    Obj readSymbol() throws IOException {
+    char readEscape() throws IOException {
+        char r;
+        switch (get()) {
+            case 'b': r = '\b'; break;
+            case 'f': r = '\f'; break;
+            case 't': r = '\t'; break;
+            case 'n': r = '\n'; break;
+            case 'r': r = '\r'; break;
+            case '\\': r = '\\'; break;
+            default: throw new ObscureException("unknown character ?\\%c", ch);
+        }
+        get();
+        return r;
+    }
+
+    Object readString() throws IOException {
+        get();
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            switch (ch) {
+                case '"': get(); return sb.toString();
+                case '\\': sb.append(readEscape()); break;
+                default: sb.append((char)ch); get(); break;
+            }
+        }
+    }
+
+    Object readChar() throws IOException {
+        switch (get()) {
+            case '\\': return readEscape();
+            default:
+                char r = (char)ch;
+                get();
+                return r;
+        }
+    }
+    
+    Object readSymbol() throws IOException {
         StringBuilder sb = new StringBuilder();
         do {
             sb.append((char)ch);
             get();
         } while (isRestSymbol(ch));
-        return Symbol.of(sb.toString());
+        String s = sb.toString();
+        if (s.equals("true")) return Boolean.TRUE;
+        else if (s.equals("false")) return Boolean.FALSE;
+        else if (s.equals("null")) return null;
+        return Symbol.of(s);
+    }
+    
+    Object readNumber() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        do {
+            sb.append((char)ch);
+            get();
+        } while (isDigit(ch));
+        return Integer.valueOf(sb.toString());
     }
 
-    public Obj read() throws IOException {
+    public Object read() throws IOException {
         skipSpace();
         switch (ch) {
             case '(': return readList();
             case '\'': return readQuote();
+            case '"': return readString();
+            case '?': return readChar();
+            case EOF: throw new ObscureException("unexpected EOF");
             default:
                 if (isFirstSymbol(ch))
                     return readSymbol();
+                else if (isDigit(ch))
+                    return readNumber();
                 else
-                    throw new ObscureException("reader: unknown charcter '%c'", ch);
+                    throw new ObscureException("unknown charcter '%s'", (char)ch);
         }
         
     }
