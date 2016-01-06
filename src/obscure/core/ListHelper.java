@@ -8,6 +8,10 @@ public class ListHelper {
         return obj instanceof List;
     }
     
+    public static boolean isPair(Object obj) {
+        return obj instanceof Pair;
+    }
+    
     public static List asList(Object obj) {
         if (!(obj instanceof List))
             throw new ObscureException("cannot cast to List: %s", obj);

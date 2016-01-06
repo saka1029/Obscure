@@ -1,16 +1,16 @@
 package obscure.globals;
 
+import obscure.core.Applicable;
 import obscure.core.Env;
 import obscure.core.List;
 import static obscure.core.ListHelper.*;
+import obscure.core.MacroClosure;
 
-import obscure.core.Applicable;
-
-public class Quote implements Applicable {
+public class MakeMacro implements Applicable {
 
     @Override
     public Object apply(Object self, List args, Env env) {
-        return car(args);
+        return new MacroClosure(car(args), asList(cdr(args)));
     }
 
 }

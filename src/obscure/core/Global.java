@@ -3,17 +3,8 @@ package obscure.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import static obscure.core.ListHelper.*;
-
-import obscure.globals.Cascade;
-import obscure.globals.Cons;
-import obscure.globals.Define;
-import obscure.globals.Lambda;
-import obscure.globals.Quote;
-import obscure.wrappers.IntegerWrapper;
-import obscure.wrappers.ObjectWrapper;
-import obscure.wrappers.PairWrapper;
-import obscure.wrappers.StringWrapper;
+import obscure.globals.*;
+import obscure.wrappers.*;
 
 public class Global {
 
@@ -23,7 +14,9 @@ public class Global {
         ENV.define(Symbol.of("Class"), Class.class);
         ENV.define(Symbol.of("cons"), new Cons());
         ENV.define(Symbol.of("define"), new Define());
+        ENV.define(Symbol.of("defmacro"), new DefMacro());
         ENV.define(Symbol.of("lambda"), new Lambda());
+        ENV.define(Symbol.of("macro"), new MakeMacro());
         ENV.define(Symbol.QUOTE, new Quote());
     }
 

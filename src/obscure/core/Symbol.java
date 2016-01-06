@@ -29,7 +29,10 @@ public class Symbol implements Evalable {
     
     @Override
     public Object eval(Env env) {
-        return env.get(this);
+        Object value = env.get(this);
+//        if (value == null)
+//            System.err.printf("symbol %s not found in %s%n", this, env);
+        return value;
     }
 
     @Override

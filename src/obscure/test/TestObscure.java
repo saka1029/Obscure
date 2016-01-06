@@ -158,4 +158,14 @@ public class TestObscure {
         read("(define (LIST . x) x)", env);
         assertEquals(Pair.list(Symbol.of("a"), Symbol.of("b")), read("(LIST 'a 'b)", env));
     }
+    
+    @Test
+    public void testMacro() throws IOException {
+        Env env = Env.create();
+        read("(define (list . x) x)", env);
+        read("(define kar (macro (x) (list 'car (list quote x))))", env);
+        assertEquals(Symbol.of("a"), read("(kar (a b))", env));
+        read("(defmacro (CAR x) (list 'car (list quote x)))", env);
+        assertEquals(Symbol.of("a"), read("(CAR (a b))", env));
+    }
 }

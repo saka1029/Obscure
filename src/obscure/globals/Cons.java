@@ -1,8 +1,9 @@
 package obscure.globals;
 
 import obscure.core.List;
-import static obscure.core.ListHelper.*;
 import obscure.core.Procedure;
+
+import static obscure.core.ListHelper.*;
 
 public class Cons implements Procedure {
 

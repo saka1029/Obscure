@@ -1,10 +1,11 @@
 package obscure.globals;
 
-import obscure.core.Applicable;
 import obscure.core.Closure;
 import obscure.core.Env;
 import obscure.core.List;
 import static obscure.core.ListHelper.*;
+
+import obscure.core.Applicable;
 
 public class Lambda implements Applicable {
 
