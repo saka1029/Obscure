@@ -21,7 +21,7 @@ public class Reader {
         if (Character.isDigit(ch)) return false;
         if (ch <= ' ') return false;
         switch (ch) {
-            case '?': case ';':
+            case '?': // case ';':
             case '"': case '\'':
             case '(': case ')':
             case '[': case ']':

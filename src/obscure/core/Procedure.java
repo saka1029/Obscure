@@ -6,8 +6,8 @@ public interface Procedure extends Applicable {
 
     static List evlis(List args, Env env) {
         Pair.Builder b = new Pair.Builder();
-        for (List a = args; a.isPair(); a = (List)a.cdr())
-            b.tail(Global.eval(a.car(), env));
+        for (Object e : args)
+            b.tail(Global.eval(e, env));
         return b.build();
     }
 

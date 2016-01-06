@@ -15,36 +15,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 import obscure.core.Applicable;
-import obscure.core.Env;
 import obscure.core.List;
 import obscure.core.ObscureException;
 import obscure.core.Procedure;
 import obscure.core.Symbol;
+import obscure.core.Wrapper;
 
-public class ObjectWrapper implements Env {
-
-    public static final ObjectWrapper VALUE = new ObjectWrapper();
+public class ObjectWrapper implements Wrapper {
 
     @Override
-    public Object get(Symbol key) {
-        if (key == Symbol.of("new"))
-            return CONSTRUCTOR;
-        else if (key == Symbol.of("get"))
-            return FIELD;
-        else
-            return method(key.name);
+    public Class<?> wrapClass() {
+        return Object.class;
     }
 
     @Override
-    public Object set(Symbol key, Object value) {
+    public Class<?> parentClass() {
         return null;
     }
 
     @Override
-    public Object define(Symbol key, Object value) {
-        return null;
+    public Applicable applicable(Symbol method, Object self) {
+        Applicable a = map.get(method);
+        if (a != null)
+            return a;
+        return method(method.name);
+    }
+
+    @Override
+    public String print(Object self) {
+        if (self == null)
+            return "null";
+        return self.toString();
     }
     
+    public static final ObjectWrapper VALUE = new ObjectWrapper();
+
     private static Map<Class<?>, Class<?>> PRIMITIVES = new HashMap<>();
     
     static {
@@ -59,14 +64,10 @@ public class ObjectWrapper implements Env {
         PRIMITIVES.put(Void.TYPE, Void.class);
     }
 
-    static List asList(Object object) {
-        return (List)object;
-    }
-
     static java.util.List<Object> list(List args) {
         java.util.List<Object> r = new ArrayList<>();
-        for (List e = args; e.isPair(); e = asList(e.cdr()))
-            r.add(e.car());
+        for (Object e : args)
+            r.add(e);
         return r;
     }
     
@@ -213,6 +214,12 @@ public class ObjectWrapper implements Env {
             throw new ObscureException(
                 "no methods %s in %s", member, cls);
         };
+    }
+
+    public static final Map<Symbol, Applicable> map = new HashMap<>();
+    static {
+        map.put(Symbol.of("new"), CONSTRUCTOR);
+        map.put(Symbol.of("@"), FIELD);
     }
 
 }

@@ -21,14 +21,15 @@ public class TestObscure {
 
     static Object read(String s, Env env) throws IOException {
         Object input = new Reader(new StringReader(s)).read();
-        Object evaled = Global.eval(input, env);
-        System.out.printf("%s -> %s%n", input, evaled);
-        return evaled;
+        Object output = Global.eval(input, env);
+        System.out.printf("%s -> %s%n", Global.print(input), Global.print(output));
+        return output;
     }
 
     @Test
     public void testRead() throws IOException {
         Env env = Env.create();
+        assertEquals(Pair.list(sym("a"), sym("b")), read("'(a b)", env));
         assertEquals(sym("a"), read("(car '(a b))", env));
         assertEquals("abcdef", read("(concat \"abc\" \"def\")", env));
         assertEquals(Pair.of(sym("a"), sym("b")), read("(cons 'a 'b))", env));
@@ -37,18 +38,28 @@ public class TestObscure {
     }
     
     @Test
+    public void testCascade() throws IOException {
+        Env env = Env.create();
+        assertEquals(StringBuilder.class, read("(define StringBuilder (forName Class \"java.lang.StringBuilder\"))", env));
+        assertEquals("abc123", read("(toString (append (append (new StringBuilder) \"abc\") 123))", env));
+        assertEquals("abc123", read("(; (new StringBuilder) (append \"abc\") (append 123) (toString))", env));
+    }
+    
+    @Test
     public void testStaticMethod() throws IOException {
         Env env = Env.create();
         assertEquals(String.class, read("(define String (getClass \"\"))", env));
         assertEquals("a0001", read("(format String \"a%04d\" 1)", env));
+        assertEquals("f123x", read("(format String \"f%d%s\" 123 \"x\")", env));
     }
 
     @Test
     public void testIntegerWrapper() throws IOException {
         Env env = Env.create();
+        assertEquals(100, read("(define x 100)", env));
         assertEquals(6, read("(+ 1 2 3)", env));
         assertEquals(10, read("(+ 1 (+ 2 3) 4)", env));
-        assertEquals(11, read("(+ 1 (* 2 3) 4)", env));
+        assertEquals(111, read("(+ 1 (* 2 3) 4 x)", env));
     }
 
     @Test
@@ -76,7 +87,7 @@ public class TestObscure {
         
         public static final int NO = 123;
         
-        public static int increment(int n) {
+        public static int plusOne(int n) {
             return n + 1;
         }
 
@@ -90,14 +101,49 @@ public class TestObscure {
         // constructor
         read("(define p (new Person \"Jhon\"))", env);
         // field
-        assertEquals("Jhon", read("(get p name)", env));
+        assertEquals("Jhon", read("(@ p name)", env));
         // method
         assertEquals("Jhon", read("(getName p)", env));
         assertEquals("Hello Jhon", read("(greeting p \"Hello\")", env));
         // static field
-        assertEquals(123, read("(get Person NO)", env));
+        assertEquals(123, read("(@ Person NO)", env));
         // static method
-        assertEquals(4, read("(increment Person (+ 1 2))", env));
+        assertEquals(4, read("(plusOne Person (+ 1 2))", env));
     }
     
+    @Test
+    public void testIntArray() throws IOException {
+        Env env = Env.create();
+        assertEquals(int[].class, read("(forName Class \"[I\")", env));
+        assertEquals(Integer.class, read("(define Integer (forName Class \"java.lang.Integer\"))", env));
+        assertEquals(int.class, read("(define int (@ (forName Class \"java.lang.Integer\") TYPE))", env));
+        read("(define array (forName Class \"java.lang.reflect.Array\"))", env);
+        assertArrayEquals(new int[] {0, 0}, (int[])read("(define intArray (newInstance array int 2))", env));
+        assertEquals(null, read("(set array intArray 0 100)", env));
+        assertEquals(null, read("(set array intArray 1 200)", env));
+        assertArrayEquals(new int[] {100, 200}, (int[])read("intArray", env));
+        assertArrayEquals(new Integer[] {null, null}, (Integer[])read("(define integerArray (newInstance array Integer 2))", env));
+        assertEquals(null, read("(set array integerArray 0 10)", env));
+        assertEquals(null, read("(set array integerArray 1 20)", env));
+        assertEquals(20, read("(get array integerArray 1)", env));
+        assertArrayEquals(new Integer[] {10, 20}, (Integer[])read("integerArray", env));
+        assertArrayEquals(new int[][] {{0, 0}, {0, 0}}, (int[][])read("(define matrix (newInstance array int 2 2))", env));
+        assertEquals(null, read("(set array (get array matrix 0) 0 0)", env));
+        assertEquals(null, read("(set array (get array matrix 0) 1 1)", env));
+        assertEquals(null, read("(set array (get array matrix 1) 0 2)", env));
+        assertEquals(null, read("(set array (get array matrix 1) 1 3)", env));
+        assertArrayEquals(new int[][] {{0, 1}, {2, 3}}, (int[][])read("matrix", env));
+    }
+    
+    static String print(Object obj) {
+        return Global.print(obj);
+    }
+
+    @Test
+    public void testPrintString() {
+        assertEquals("\"abc\"", print("abc"));
+        assertEquals("\"a \\\"quoted\\\" c\"", print("a \"quoted\" c"));
+        assertEquals("\"a\\rb\\nc\"", print("a\rb\nc"));
+    }
+
 }

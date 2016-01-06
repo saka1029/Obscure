@@ -1,6 +1,6 @@
 package obscure.core;
 
-public class Nil implements List {
+public class Nil extends List {
 
     public static Nil value = new Nil();
     
@@ -12,17 +12,11 @@ public class Nil implements List {
         return "()";
     }
 
-    @Override public Object car() { throw new ObscureException(); }
+    @Override public Object car() { throw new ObscureException("cannot get car for Nil"); }
 
-    @Override public Object cdr() { throw new ObscureException(); }
+    @Override public Object cdr() { throw new ObscureException("cannot get cdr for Nil"); }
 
     @Override public boolean isPair() { return false; }
-
-    @Override public Object get(Symbol key) { return null; }
-
-    @Override public Object set(Symbol key, Object value) { return null; }
-
-    @Override public Object define(Symbol key, Object value) { return null; }
 
     @Override public Object eval(Env env) { return this; }
 

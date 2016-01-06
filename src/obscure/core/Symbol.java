@@ -6,9 +6,9 @@ import java.util.Map;
 public class Symbol implements Evalable {
     
     static final Map<String, Symbol> map = new HashMap<>();
-    static final Symbol QUOTE = of("quote");
-    static final Symbol TRUE = of("true");
-    static final Symbol FALSE = of("false");
+    public static final Symbol QUOTE = of("quote");
+    public static final Symbol TRUE = of("true");
+    public static final Symbol FALSE = of("false");
     
     public final String name;
     

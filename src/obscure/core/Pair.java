@@ -1,6 +1,6 @@
 package obscure.core;
 
-public class Pair implements List {
+public class Pair extends List {
 
     Object car;
     Object cdr;
@@ -17,7 +17,7 @@ public class Pair implements List {
         return new Pair(car, cdr);
     }
 
-    static List list(Object... args) {
+    public static List list(Object... args) {
         Builder b = new Builder();
         for (Object e : args)
             b.tail(e);
@@ -35,17 +35,17 @@ public class Pair implements List {
     @Override
     public String toString() {
         if (car == Symbol.QUOTE && isPair(cdr) && asPair(cdr).cdr == Nil.value)
-            return "'" + asPair(cdr).car;
+            return "'" + Global.print(asPair(cdr).car);
         StringBuilder sb = new StringBuilder();
         sb.append("(");
         Object e = this;
         String sep = "";
         for (; isPair(e); e = asPair(e).cdr) {
-            sb.append(sep).append(asPair(e).car);
+            sb.append(sep).append(Global.print(asPair(e).car));
             sep = " ";
         }
         if (e != Nil.value)
-            sb.append(" . ").append(e);
+            sb.append(" . ").append(Global.print(e));
         sb.append(")");
         return sb.toString();
     }
@@ -100,43 +100,18 @@ public class Pair implements List {
         return (List)object;
     }
 
-    static Env ENV = Env.create();
-    static {
-        ENV.define(Symbol.of("car"), (Procedure)((self, args) -> asList(self).car()));
-        ENV.define(Symbol.of("cdr"), (Procedure)((self, args) -> asList(self).car()));
-    }
-
-    @Override public Object get(Symbol key) {
-        return ENV.get(key);
-    }
-
-    @Override
-    public Object set(Symbol key, Object value) {
-        return null;
-    }
-
-    @Override
-    public Object define(Symbol key, Object value) {
-        return null;
-    }
-
     @Override
     public Object eval(Env env) {
         Object first = Global.eval(car, env);
         if (first instanceof Applicable)
-            return ((Applicable)first).apply(env, asList(cdr), env);
+            return ((Applicable)first).apply(null, asList(cdr), env);
         if (!(cdr instanceof Pair))
             throw new ObscureException("cannot eval %s", this);
         Pair cdr = (Pair)this.cdr;
         Object second = Global.eval(cdr.car, env);
-        Env self;
-        if (second instanceof Env)
-            self = (Env)second;
-        else
-            self = Global.wrap(second);
-        first = Global.eval(car, self);
-        if (!(first instanceof Applicable))
-            throw new ObscureException("cannot apply %s %s", first, cdr.cdr);
-        return ((Applicable)first).apply(second, asList(cdr.cdr), env);
+        if (second == null)
+            throw new ObscureException("%s is evaled to null", cdr.car);
+        Applicable applicable = Global.applicable((Symbol)car, second);
+        return applicable.apply(second, asList(cdr.cdr), env);
     }
 }

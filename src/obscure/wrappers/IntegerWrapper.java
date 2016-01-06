@@ -1,32 +1,34 @@
 package obscure.wrappers;
 
-import obscure.core.Env;
-import obscure.core.List;
 import obscure.core.Procedure;
 import obscure.core.Symbol;
 
-public class IntegerWrapper {
-
-    public static final Env VALUE = Env.create(ObjectWrapper.VALUE);
+public class IntegerWrapper extends AbstractWrapper {
     
-    static List asList(Object object) {
-        return (List)object;
+    @Override
+    public Class<?> wrapClass() {
+        return Integer.class;
     }
-    
-    static {
-        VALUE.define(Symbol.of("+"), (Procedure) ((self, args) -> {
+
+    @Override
+    public Class<?> parentClass() {
+        return Object.class;
+    }
+
+    public IntegerWrapper() {
+        map.put(Symbol.of("+"), (Procedure) ((self, args) -> {
             int sum = 0;
             sum += (int)self;
-            for (List a = args; a.isPair(); a = asList(a.cdr()))
-                sum += (int)a.car();
+            for (Object e : args)
+                sum += (int)e;
             return sum;
         }));
-        VALUE.define(Symbol.of("*"), (Procedure) ((self, args) -> {
-            int sum = 1;
-            sum *= (int)self;
-            for (List a = args; a.isPair(); a = asList(a.cdr()))
-                sum *= (int)a.car();
-            return sum;
+        map.put(Symbol.of("*"), (Procedure) ((self, args) -> {
+            int p = 1;
+            p *= (int)self;
+            for (Object e : args)
+                p *= (int)e;
+            return p;
         }));
     }
 
