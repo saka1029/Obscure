@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static obscure.core.ListHelper.*;
+
+import obscure.globals.Cascade;
+import obscure.globals.Cons;
+import obscure.globals.Define;
+import obscure.globals.Lambda;
+import obscure.globals.Quote;
 import obscure.wrappers.IntegerWrapper;
 import obscure.wrappers.ObjectWrapper;
 import obscure.wrappers.PairWrapper;
@@ -13,31 +19,12 @@ public class Global {
 
     public static final Env ENV = Env.create(null);
     static {
-        ENV.define(Symbol.QUOTE, (Applicable)(self, args, env) -> car(args));
-        ENV.define(Symbol.of("cons"), (Procedure)(self, args) -> 
-            cons(car(args), cadr(args))  );
-        ENV.define(Symbol.of("define"), (Applicable)(self, args, env) -> {
-            Object first = car(args);
-            if (first instanceof Symbol)
-                return env.define((Symbol)first, Global.eval(cadr(args), env));
-            else if (first instanceof Pair)
-                return env.define((Symbol)car(first), new Closure(cdr(first), (List)cdr(args), env));
-            else
-                throw new ObscureException("cannot define %s", args);
-        });
+        ENV.define(Symbol.of(";"), new Cascade());
         ENV.define(Symbol.of("Class"), Class.class);
-        ENV.define(Symbol.of(";"), (Macro)(args) -> {
-            Object w = Nil.value;
-            for (Object e : args)
-                if (w == Nil.value)
-                    w = e;
-                else
-                    w = cons(car(e), cons(w, cdr(e)));
-            return w;
-        });
-        ENV.define(Symbol.of("lambda"), (Applicable)(self, args, env) ->
-            new Closure(car(args), (List)cdr(args), env)
-        );
+        ENV.define(Symbol.of("cons"), new Cons());
+        ENV.define(Symbol.of("define"), new Define());
+        ENV.define(Symbol.of("lambda"), new Lambda());
+        ENV.define(Symbol.QUOTE, new Quote());
     }
 
     static final Map<Class<?>, Wrapper> map = new HashMap<>();
