@@ -145,5 +145,17 @@ public class TestObscure {
         assertEquals("\"a \\\"quoted\\\" c\"", print("a \"quoted\" c"));
         assertEquals("\"a\\rb\\nc\"", print("a\rb\nc"));
     }
-
+    
+    @Test
+    public void testLambda() throws IOException {
+        Env env = Env.create();
+        assertEquals(Symbol.of("a"), read("((lambda (x) (car x)) '(a b))", env));
+        assertEquals(Pair.list(Symbol.of("a"), Symbol.of("b")), read("((lambda x x) 'a 'b)", env));
+        read("(define kar (lambda (x) (car x)))", env);
+        assertEquals(Symbol.of("a"), read("(kar '(a b))", env));
+        read("(define (first x) (car x))", env);
+        assertEquals(Symbol.of("a"), read("(first '(a b))", env));
+        read("(define (LIST . x) x)", env);
+        assertEquals(Pair.list(Symbol.of("a"), Symbol.of("b")), read("(LIST 'a 'b)", env));
+    }
 }

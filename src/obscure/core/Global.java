@@ -17,9 +17,13 @@ public class Global {
         ENV.define(Symbol.of("cons"), (Procedure)(self, args) -> 
             cons(car(args), cadr(args))  );
         ENV.define(Symbol.of("define"), (Applicable)(self, args, env) -> {
-            Symbol key = (Symbol)car(args);
-            Object value = cadr(args);
-            return env.define(key, Global.eval(value, env));
+            Object first = car(args);
+            if (first instanceof Symbol)
+                return env.define((Symbol)first, Global.eval(cadr(args), env));
+            else if (first instanceof Pair)
+                return env.define((Symbol)car(first), new Closure(cdr(first), (List)cdr(args), env));
+            else
+                throw new ObscureException("cannot define %s", args);
         });
         ENV.define(Symbol.of("Class"), Class.class);
         ENV.define(Symbol.of(";"), (Macro)(args) -> {
@@ -31,6 +35,9 @@ public class Global {
                     w = cons(car(e), cons(w, cdr(e)));
             return w;
         });
+        ENV.define(Symbol.of("lambda"), (Applicable)(self, args, env) ->
+            new Closure(car(args), (List)cdr(args), env)
+        );
     }
 
     static final Map<Class<?>, Wrapper> map = new HashMap<>();
