@@ -1,5 +1,7 @@
 package obscure.core;
 
+import static obscure.core.ListHelper.*;
+
 public interface Procedure extends Applicable {
 
     Object apply(Object self, List args);
@@ -7,7 +9,7 @@ public interface Procedure extends Applicable {
     static List evlis(List args, Env env) {
         Pair.Builder b = new Pair.Builder();
         for (Object e : args)
-            b.tail(Global.eval(e, env));
+            b.tail(eval(e, env));
         return b.build();
     }
 

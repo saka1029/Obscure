@@ -28,8 +28,13 @@ public class MacroClosure implements Macro {
         Object r = false;
         Env n = pairlis(parms, args, env);
         for (Object e : body)
-            r = Global.eval(e, n);
+            r = eval(e, n);
         return r;
+    }
+    
+    @Override
+    public String toString() {
+        return print(cons(sym("Macro"), cons(parms, body)));
     }
 
 }

@@ -1,5 +1,6 @@
 package obscure.wrappers;
 
+import static obscure.core.ListHelper.*;
 import obscure.core.Pair;
 import obscure.core.Procedure;
 import obscure.core.Symbol;
@@ -17,8 +18,9 @@ public class PairWrapper extends AbstractWrapper {
     }
 
     public PairWrapper() {
-        map.put(Symbol.of("car"), (Procedure)(self, args) -> ((Pair)self).car());
-        map.put(Symbol.of("cdr"), (Procedure)(self, args) -> ((Pair)self).cdr());
+        map.put(Symbol.of("car"), (Procedure)(self, args) -> car(self));
+        map.put(Symbol.of("cdr"), (Procedure)(self, args) -> cdr(self));
+        map.put(Symbol.of("append"), new Append());
     }
 
 }

@@ -35,11 +35,15 @@ public class ObjectWrapper implements Wrapper {
 
     @Override
     public Applicable applicable(Symbol method, Object self) {
-        Applicable a = map.get(method);
-        if (a != null)
-            return a;
-        return method(method.name);
+        switch (method.name) {
+            case "@": return FIELD;
+            case "new" : return CONSTRUCTOR;
+            case "cons" : return CONS;
+            default: return method(method.name);
+        }
     }
+    
+    static Applicable CONS = new Cons();
 
     @Override
     public String print(Object self) {
@@ -48,8 +52,6 @@ public class ObjectWrapper implements Wrapper {
         return self.toString();
     }
     
-    public static final ObjectWrapper VALUE = new ObjectWrapper();
-
     private static Map<Class<?>, Class<?>> PRIMITIVES = new HashMap<>();
     
     static {
@@ -214,12 +216,6 @@ public class ObjectWrapper implements Wrapper {
             throw new ObscureException(
                 "no methods %s in %s", member, cls);
         };
-    }
-
-    public static final Map<Symbol, Applicable> map = new HashMap<>();
-    static {
-        map.put(Symbol.of("new"), CONSTRUCTOR);
-        map.put(Symbol.of("@"), FIELD);
     }
 
 }

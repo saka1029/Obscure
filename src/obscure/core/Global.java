@@ -12,13 +12,13 @@ public class Global {
     static {
         ENV.define(Symbol.of(";"), new Cascade());
         ENV.define(Symbol.of("Class"), Class.class);
-        ENV.define(Symbol.of("cons"), new Cons());
-        ENV.define(Symbol.of("define"), new Define());
-        ENV.define(Symbol.of("defmacro"), new DefMacro());
-        ENV.define(Symbol.of("expand"), new Expand());
-        ENV.define(Symbol.of("lambda"), new Lambda());
-        ENV.define(Symbol.of("let"), new Let());
-        ENV.define(Symbol.of("macro"), new MakeMacro());
+//        ENV.define(Symbol.of("cons"), new Cons());
+        ENV.define(Symbol.of("*define"), new Define());
+        ENV.define(Symbol.of("*define-macro"), new DefMacro());
+        ENV.define(Symbol.of("*expand"), new Expand());
+        ENV.define(Symbol.LAMBDA, new Lambda());
+        ENV.define(Symbol.of("*let"), new Let());
+        ENV.define(Symbol.of("*macro"), new MakeMacro());
         ENV.define(Symbol.QUOTE, new Quote());
     }
 

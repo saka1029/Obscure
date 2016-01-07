@@ -1,4 +1,4 @@
-package obscure.globals;
+package obscure.wrappers;
 
 import obscure.core.List;
 import obscure.core.Procedure;
@@ -9,7 +9,7 @@ public class Cons implements Procedure {
 
     @Override
     public Object apply(Object self, List args) {
-        return cons(car(args), cadr(args));
+        return cons(self, car(args));
     }
 
 }

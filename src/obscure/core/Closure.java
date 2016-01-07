@@ -1,5 +1,7 @@
 package obscure.core;
 
+import static obscure.core.ListHelper.*;
+
 public class Closure implements Procedure {
  
     final Object parms;
@@ -12,20 +14,12 @@ public class Closure implements Procedure {
         this.env = env;
     }
     
-    static boolean isPair(Object obj) {
-        return obj instanceof Pair;
-    }
-    
-    static List asList(Object obj) {
-        return (List)obj;
-    }
-
     static Env pairlis(Object parms, List args, Env env) {
         Env n = Env.create(env);
         Object p = parms;
         Object a = args;
-        for (; isPair(p); p = asList(p).cdr(), a = asList(args).cdr())
-            n.define((Symbol)asList(p).car(), asList(a).car());
+        for (; isPair(p); p = cdr(p), a = cdr(a))
+            n.define((Symbol)car(p), car(a));
         if (p instanceof Symbol)
             n.define((Symbol)p, a);
         return n;
@@ -36,8 +30,13 @@ public class Closure implements Procedure {
         Object r = false;
         Env n = pairlis(parms, args, env);
         for (Object e : body)
-            r = Global.eval(e, n);
+            r = eval(e, n);
         return r;
+    }
+    
+    @Override
+    public String toString() {
+        return print(cons(sym("Closure"), cons(parms, body)));
     }
 
 }

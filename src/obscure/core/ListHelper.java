@@ -50,4 +50,12 @@ public class ListHelper {
         return Pair.list(args);
     }
     
+    public static Object eval(Object obj, Env env) {
+        return Global.eval(obj, env);
+    }
+    
+    public static String print(Object obj) {
+        return Global.print(obj);
+    }
+    
 }

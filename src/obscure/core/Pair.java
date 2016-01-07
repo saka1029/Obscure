@@ -1,5 +1,7 @@
 package obscure.core;
 
+import java.util.Objects;
+
 public class Pair extends List {
 
     Object car;
@@ -29,7 +31,7 @@ public class Pair extends List {
         if (!(obj instanceof Pair))
             return false;
         Pair o = (Pair)obj;
-        return o.car.equals(car) && o.cdr.equals(cdr);
+        return Objects.equals(car, o.car) && Objects.equals(cdr, o.cdr);
     }
     
     @Override

@@ -5,6 +5,7 @@ import obscure.core.List;
 import static obscure.core.ListHelper.*;
 import obscure.core.Macro;
 import obscure.core.Pair;
+import obscure.core.Symbol;
 
 public class Let implements Macro {
 
@@ -18,7 +19,7 @@ public class Let implements Macro {
             p.tail(car(e));
             a.tail(cadr(e));
         }
-        return cons(cons(sym("lambda"), cons(p.build(), body)), a.build());
+        return cons(cons(Symbol.LAMBDA, cons(p.build(), body)), a.build());
     }
 
 }

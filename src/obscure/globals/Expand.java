@@ -2,7 +2,6 @@ package obscure.globals;
 
 import obscure.core.Applicable;
 import obscure.core.Env;
-import obscure.core.Global;
 import obscure.core.List;
 import obscure.core.Macro;
 
@@ -16,7 +15,7 @@ public class Expand implements Applicable {
         if (!isPair(arg))
             return arg;
         Object first = car(arg);
-        Object proc = Global.eval(first, env);
+        Object proc = eval(first, env);
         if (proc instanceof Macro)
             return ((Macro)proc).expand((List)cdr(arg), env);
         return arg;
