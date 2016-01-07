@@ -4,7 +4,7 @@ public interface Wrapper {
 
     Class<?> wrapClass();
     Class<?> parentClass();
-    Applicable applicable(Symbol method, Object self);
+    Applicable applicable(Object self, Object args);
     String print(Object self);
 
 }

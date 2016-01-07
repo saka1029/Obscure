@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import obscure.globals.*;
+import static obscure.core.ListHelper.*;
 import obscure.wrappers.*;
 
 public class Global {
@@ -12,7 +13,8 @@ public class Global {
     static {
         ENV.define(Symbol.of(";"), new Cascade());
         ENV.define(Symbol.of("Class"), Class.class);
-//        ENV.define(Symbol.of("cons"), new Cons());
+        ENV.define(Symbol.of("car"), (Procedure)(self, args) -> car(car(args)));
+        ENV.define(Symbol.of("cons"), (Procedure)(self, args) -> cons(car(args), cadr(args)));
         ENV.define(Symbol.of("*define"), new Define());
         ENV.define(Symbol.of("*define-macro"), new DefMacro());
         ENV.define(Symbol.of("*expand"), new Expand());
@@ -42,14 +44,14 @@ public class Global {
         return self;
     }
 
-    public static Applicable applicable(Symbol method, Object self) {
+    public static Applicable applicable(Object self, Object args) {
         Class<?> cls = self.getClass();
         for (Wrapper w = map.get(cls); w != null; w = map.get(w.parentClass())) {
-            Applicable r = w.applicable(method, self);
+            Applicable r = w.applicable(self, args);
             if (r != null)
                 return r;
         }
-        return objectWrapper.applicable(method, self);
+        return objectWrapper.applicable(self, args);
     }
 
     public static String print(Object self) {

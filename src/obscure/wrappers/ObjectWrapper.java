@@ -16,6 +16,7 @@ import java.util.Map;
 
 import obscure.core.Applicable;
 import obscure.core.List;
+import static obscure.core.ListHelper.*;
 import obscure.core.ObscureException;
 import obscure.core.Procedure;
 import obscure.core.Symbol;
@@ -34,17 +35,17 @@ public class ObjectWrapper implements Wrapper {
     }
 
     @Override
-    public Applicable applicable(Symbol method, Object self) {
-        switch (method.name) {
-            case "@": return FIELD;
-            case "new" : return CONSTRUCTOR;
-            case "cons" : return CONS;
-            default: return method(method.name);
-        }
+    public Applicable applicable(Object self, Object args) {
+        if (isPair(args)) {
+            String name = ((Symbol)car(args)).name;
+            switch (name) {
+                case "new" : return CONSTRUCTOR;
+                default: return method(name);
+            }
+        } else
+            return field(((Symbol)args).name);
     }
     
-    static Applicable CONS = new Cons();
-
     @Override
     public String print(Object self) {
         if (self == null)
@@ -137,31 +138,32 @@ public class ObjectWrapper implements Wrapper {
             return actualArgumentsNoVarArgs(e, args);
     }
 
-    static Applicable FIELD = (self, args, env) -> {
-        Class<?> cls = self.getClass();
-        String member = ((Symbol)args.car()).name;
-        try {
-            Field f = cls.getField(member);
-            return f.get(self);
-        } catch (NoSuchFieldException n) {
-            if (self instanceof Class) {
-                try {
-                    Field f = ((Class<?>)self).getField(member);
-                    return f.get(self);
-                } catch (NoSuchFieldException
-                        | SecurityException
-                        | IllegalArgumentException
-                        | IllegalAccessException p) {
-                    throw new ObscureException(p);
+    static Applicable field(String name) {
+        return (self, args, env) -> {
+            Class<?> cls = self.getClass();
+            try {
+                Field f = cls.getField(name);
+                return f.get(self);
+            } catch (NoSuchFieldException n) {
+                if (self instanceof Class) {
+                    try {
+                        Field f = ((Class<?>)self).getField(name);
+                        return f.get(self);
+                    } catch (NoSuchFieldException
+                            | SecurityException
+                            | IllegalArgumentException
+                            | IllegalAccessException p) {
+                        throw new ObscureException(p);
+                    }
                 }
+                throw new ObscureException("no fields %s in %s", name, self);
+            } catch (SecurityException
+                    | IllegalArgumentException
+                    | IllegalAccessException e) {
+                throw new ObscureException(e);
             }
-            throw new ObscureException("no fields %s in %s", member, self);
-        } catch (SecurityException
-                | IllegalArgumentException
-                | IllegalAccessException e) {
-            throw new ObscureException(e);
-        }
-    };
+        };
+    }
 
     static Procedure CONSTRUCTOR = (self, args) -> {
         for (Constructor<?> c : ((Class<?>)self).getConstructors()) {

@@ -13,7 +13,7 @@ public class Cascade implements Macro {
     public Object expand(List args, Env env) {
         Object w = Nil.value;
         for (Object e : args)
-            w = w == Nil.value ? e : cons(car(e), cons(w, cdr(e)));
+            w = w == Nil.value ? e : cons(w, e);
         return w;
     }
 

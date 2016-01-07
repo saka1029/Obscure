@@ -1,6 +1,7 @@
 package obscure.core;
 
 import java.util.Objects;
+import static obscure.core.ListHelper.*;
 
 public class Pair extends List {
 
@@ -12,6 +13,16 @@ public class Pair extends List {
         this.cdr = cdr;
     }
     
+    @Override
+    public Object eval(Env env) {
+        Object first = Global.eval(car, env);
+        if (first instanceof Applicable)
+            return ((Applicable)first).apply(null, asList(cdr), env);
+        Applicable applicable = Global.applicable(first, cdr);
+        List args = isPair(cdr) ? asList(((Pair)cdr).cdr) : null;
+        return applicable.apply(first, args, env);
+    }
+
     public static boolean isPair(Object o) { return o instanceof Pair; }
     public static Pair asPair(Object o) { return ((Pair)o); }
     
@@ -100,20 +111,5 @@ public class Pair extends List {
 
     public static List asList(Object object) {
         return (List)object;
-    }
-
-    @Override
-    public Object eval(Env env) {
-        Object first = Global.eval(car, env);
-        if (first instanceof Applicable)
-            return ((Applicable)first).apply(null, asList(cdr), env);
-        if (!(cdr instanceof Pair))
-            throw new ObscureException("cannot eval %s", this);
-        Pair cdr = (Pair)this.cdr;
-        Object second = Global.eval(cdr.car, env);
-        if (second == null)
-            throw new ObscureException("%s is evaled to null", cdr.car);
-        Applicable applicable = Global.applicable((Symbol)car, second);
-        return applicable.apply(second, asList(cdr.cdr), env);
     }
 }
