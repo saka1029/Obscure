@@ -16,9 +16,15 @@ public class ListHelper {
         return obj instanceof Pair;
     }
     
+    public static Pair asPair(Object obj) {
+        if (!(obj instanceof List))
+            throw new ObscureException("cannot cast to Pair: %s", print(obj));
+        return (Pair)obj;
+    }
+    
     public static List asList(Object obj) {
         if (!(obj instanceof List))
-            throw new ObscureException("cannot cast to List: %s", obj);
+            throw new ObscureException("cannot cast to List: %s", print(obj));
         return (List)obj;
     }
 

@@ -68,7 +68,7 @@ public class Reader {
                     get();
                     return b.build();
                 case '.':
-                    if (b.tail() == Nil.value)
+                    if (b.isEmpty())
                         throw new ObscureException("unexpected '.' after '('");
                     get();
                     b.end(read());
@@ -97,6 +97,7 @@ public class Reader {
             case 't': r = '\t'; break;
             case 'n': r = '\n'; break;
             case 'r': r = '\r'; break;
+            case '\"': r = '\"'; break;
             case '\\': r = '\\'; break;
             default: throw new ObscureException("unknown character ?\\%c", ch);
         }
@@ -111,6 +112,8 @@ public class Reader {
             switch (ch) {
                 case '"': get(); return sb.toString();
                 case '\\': sb.append(readEscape()); break;
+                case '\b': case '\f': case '\r': case '\n':
+                    throw new ObscureException("unterminated string literal %s", sb);
                 default: sb.append((char)ch); get(); break;
             }
         }
@@ -119,6 +122,8 @@ public class Reader {
     Object readChar() throws IOException {
         switch (get()) {
             case '\\': return readEscape();
+                case '\b': case '\f': case '\r': case '\n':
+                throw new ObscureException("unterminated character literal");
             default:
                 char r = (char)ch;
                 get();

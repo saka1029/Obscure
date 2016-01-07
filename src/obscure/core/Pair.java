@@ -19,13 +19,10 @@ public class Pair extends List {
         if (first instanceof Applicable)
             return ((Applicable)first).apply(null, asList(cdr), env);
         Applicable applicable = Global.applicable(first, cdr);
-        List args = isPair(cdr) ? asList(((Pair)cdr).cdr) : null;
+        List args = isPair(cdr) ? asList(asPair(cdr).cdr) : null;
         return applicable.apply(first, args, env);
     }
 
-    public static boolean isPair(Object o) { return o instanceof Pair; }
-    public static Pair asPair(Object o) { return ((Pair)o); }
-    
     public static Pair of(Object car, Object cdr) {
         return new Pair(car, cdr);
     }
@@ -87,8 +84,8 @@ public class Pair extends List {
             return this;
         }
         
-        public List tail() {
-            return tail;
+        public boolean isEmpty() {
+            return tail == Nil.value;
         }
 
         public Builder end(Object e) {
@@ -107,9 +104,5 @@ public class Pair extends List {
 
     @Override public Object car() { return car; }
     @Override public Object cdr() { return cdr; }
-    @Override public boolean isPair() { return true; }
 
-    public static List asList(Object object) {
-        return (List)object;
-    }
 }

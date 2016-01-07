@@ -16,8 +16,6 @@ public class Nil extends List {
 
     @Override public Object cdr() { throw new ObscureException("cannot get cdr for Nil"); }
 
-    @Override public boolean isPair() { return false; }
-
     @Override public Object eval(Env env) { return this; }
 
 }

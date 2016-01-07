@@ -33,14 +33,14 @@ public class StringWrapper extends AbstractWrapper {
         for (int i = 0, l = s.length(); i < l; ++i) {
             char c = s.charAt(i);
             switch (c) {
-            case '\"': sb.append("\\\""); break;
-            case '\\': sb.append("\\\\"); break;
-            case '\b': sb.append("\\b"); break;
-            case '\f': sb.append("\\f"); break;
-            case '\t': sb.append("\\t"); break;
-            case '\n': sb.append("\\n"); break;
-            case '\r': sb.append("\\r"); break;
-            default: sb.append(c); break;
+                case '\"': sb.append("\\\""); break;
+                case '\\': sb.append("\\\\"); break;
+                case '\b': sb.append("\\b"); break;
+                case '\f': sb.append("\\f"); break;
+                case '\t': sb.append("\\t"); break;
+                case '\n': sb.append("\\n"); break;
+                case '\r': sb.append("\\r"); break;
+                default: sb.append(c); break;
             }
         }
         sb.append("\"");

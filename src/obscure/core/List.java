@@ -7,7 +7,6 @@ public abstract class List implements Evalable, Iterable<Object> {
 
     public abstract Object car();
     public abstract Object cdr();
-    public abstract boolean isPair();
     
     @Override
     public Iterator<Object> iterator() {

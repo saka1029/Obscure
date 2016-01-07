@@ -3,19 +3,20 @@ package obscure.test;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.io.StringReader;
 
 import org.junit.Test;
 
 import obscure.core.Env;
 import obscure.core.Global;
+import obscure.core.ObscureException;
+
 import static obscure.core.ListHelper.*;
 import obscure.core.Reader;
 
 public class TestObscure {
 
     static Object read(String s) throws IOException {
-        return new Reader(new StringReader(s)).read();
+        return new Reader(s).read();
     }
 
     static Object evalRead(String s, Env env) throws IOException {
@@ -195,5 +196,19 @@ public class TestObscure {
         assertEquals(111, evalRead("(+ 1 (* 2 3) 4 x)", env));
         assertEquals("a123b", evalRead("(+ \"a\" (+ 100 23) 'b)", env));
         assertEquals(list(0, 1, 2, 3), evalRead("(+ '(0 1) '(2 3))", env));
+    }
+    
+    @Test
+    public void testReader() throws IOException {
+        assertEquals("first\r\nsecond", read("\"first\\r\\nsecond\""));
+        assertEquals("He said \"Yes.\".", read("\"He said \\\"Yes.\\\".\""));
+        assertEquals("\"He said \\\"Yes.\\\".\"", print(read("\"He said \\\"Yes.\\\".\"")));
+        assertEquals('\r', read("?\\r"));
+        assertEquals("?\\r", print(read("?\\r")));
+    }
+    
+    @Test(expected = ObscureException.class)
+    public void testReaderUnterminatedString() throws IOException {
+        assertEquals("first\r\nsecond", read("\"first\r\nsecond\""));
     }
 }

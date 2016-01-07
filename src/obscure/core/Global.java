@@ -38,6 +38,7 @@ public class Global {
         add(new PairWrapper());
         add(new IntegerWrapper());
         add(new StringWrapper());
+        add(new CharacterWrapper());
     }
     
     public static Object eval(Object self, Env env) {
