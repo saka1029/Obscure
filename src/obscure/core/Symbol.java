@@ -6,7 +6,7 @@ import java.util.Map;
 public class Symbol implements Evalable {
     
     static final Map<String, Symbol> map = new HashMap<>();
-    public static final Symbol LAMBDA = of("*lambda");
+    public static final Symbol LAMBDA = of("lambda");
     public static final Symbol QUOTE = of("quote");
     public static final Symbol TRUE = of("true");
     public static final Symbol FALSE = of("false");

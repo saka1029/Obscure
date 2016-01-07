@@ -12,15 +12,17 @@ public class Global {
     public static final Env ENV = Env.create(null);
     static {
         ENV.define(Symbol.of(";"), new Cascade());
+        ENV.define(Symbol.of("+"), new Add());
+        ENV.define(Symbol.of("*"), new Multiply());
         ENV.define(Symbol.of("Class"), Class.class);
         ENV.define(Symbol.of("car"), (Procedure)(self, args) -> car(car(args)));
         ENV.define(Symbol.of("cons"), (Procedure)(self, args) -> cons(car(args), cadr(args)));
-        ENV.define(Symbol.of("*define"), new Define());
-        ENV.define(Symbol.of("*define-macro"), new DefMacro());
-        ENV.define(Symbol.of("*expand"), new Expand());
+        ENV.define(Symbol.of("define"), new Define());
+        ENV.define(Symbol.of("define-macro"), new DefMacro());
+        ENV.define(Symbol.of("expand"), new Expand());
         ENV.define(Symbol.LAMBDA, new Lambda());
-        ENV.define(Symbol.of("*let"), new Let());
-        ENV.define(Symbol.of("*macro"), new MakeMacro());
+        ENV.define(Symbol.of("let"), new Let());
+        ENV.define(Symbol.of("macro"), new MakeMacro());
         ENV.define(Symbol.QUOTE, new Quote());
     }
 

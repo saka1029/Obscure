@@ -39,7 +39,7 @@ public class TestObscure {
     @Test
     public void testCascade() throws IOException {
         Env env = Env.create();
-        assertEquals(StringBuilder.class, evalRead("(*define StringBuilder (Class forName \"java.lang.StringBuilder\"))", env));
+        assertEquals(StringBuilder.class, evalRead("(define StringBuilder (Class forName \"java.lang.StringBuilder\"))", env));
         assertEquals("abc123", evalRead("((((StringBuilder new) append \"abc\") append 123) toString)", env));
         assertEquals("abc123", evalRead("(; (StringBuilder new) (append \"abc\") (append 123) (toString))", env));
     }
@@ -47,7 +47,7 @@ public class TestObscure {
     @Test
     public void testStaticMethod() throws IOException {
         Env env = Env.create();
-        assertEquals(String.class, evalRead("(*define String (\"\" getClass))", env));
+        assertEquals(String.class, evalRead("(define String (\"\" getClass))", env));
         assertEquals("a0001", evalRead("(String format \"a%04d\" 1)", env));
         assertEquals("f123x", evalRead("(String format \"f%d%s\" 123 \"x\")", env));
     }
@@ -55,7 +55,7 @@ public class TestObscure {
     @Test
     public void testIntegerWrapper() throws IOException {
         Env env = Env.create();
-        assertEquals(100, evalRead("(*define x 100)", env));
+        assertEquals(100, evalRead("(define x 100)", env));
         assertEquals(6, evalRead("(1 + 2 3)", env));
         assertEquals(10, evalRead("(1 + (2 + 3) 4)", env));
         assertEquals(111, evalRead("(1 + (2 * 3) 4 x)", env));
@@ -96,9 +96,9 @@ public class TestObscure {
     public void testPerson() throws IOException {
         Env env = Env.create();
 //        env.define(sym("Person"), Person.class);
-        assertEquals(Person.class, evalRead("(*define Person (Class forName \"" + Person.class.getName() + "\"))", env));
+        assertEquals(Person.class, evalRead("(define Person (Class forName \"" + Person.class.getName() + "\"))", env));
         // constructor
-        evalRead("(*define p (Person new \"Jhon\"))", env);
+        evalRead("(define p (Person new \"Jhon\"))", env);
         // field
         assertEquals("Jhon", evalRead("(p . name)", env));
         // method
@@ -114,19 +114,19 @@ public class TestObscure {
     public void testIntArray() throws IOException {
         Env env = Env.create();
         assertEquals(int[].class, evalRead("(Class forName \"[I\")", env));
-        assertEquals(Integer.class, evalRead("(*define Integer (Class forName \"java.lang.Integer\"))", env));
-        assertEquals(int.class, evalRead("(*define int ((Class forName \"java.lang.Integer\") . TYPE))", env));
-        evalRead("(*define array (Class forName \"java.lang.reflect.Array\"))", env);
-        assertArrayEquals(new int[] {0, 0}, (int[])evalRead("(*define intArray (array newInstance int 2))", env));
+        assertEquals(Integer.class, evalRead("(define Integer (Class forName \"java.lang.Integer\"))", env));
+        assertEquals(int.class, evalRead("(define int ((Class forName \"java.lang.Integer\") . TYPE))", env));
+        evalRead("(define array (Class forName \"java.lang.reflect.Array\"))", env);
+        assertArrayEquals(new int[] {0, 0}, (int[])evalRead("(define intArray (array newInstance int 2))", env));
         assertEquals(null, evalRead("(array set intArray 0 100)", env));
         assertEquals(null, evalRead("(array set intArray 1 200)", env));
         assertArrayEquals(new int[] {100, 200}, (int[])evalRead("intArray", env));
-        assertArrayEquals(new Integer[] {null, null}, (Integer[])evalRead("(*define integerArray (array newInstance Integer 2))", env));
+        assertArrayEquals(new Integer[] {null, null}, (Integer[])evalRead("(define integerArray (array newInstance Integer 2))", env));
         assertEquals(null, evalRead("(array set integerArray 0 10)", env));
         assertEquals(null, evalRead("(array set integerArray 1 20)", env));
         assertEquals(20, evalRead("(array get integerArray 1)", env));
         assertArrayEquals(new Integer[] {10, 20}, (Integer[])evalRead("integerArray", env));
-        assertArrayEquals(new int[][] {{0, 0}, {0, 0}}, (int[][])evalRead("(*define matrix (array newInstance int 2 2))", env));
+        assertArrayEquals(new int[][] {{0, 0}, {0, 0}}, (int[][])evalRead("(define matrix (array newInstance int 2 2))", env));
         assertEquals(null, evalRead("(array set (array get matrix 0) 0 0)", env));
         assertEquals(null, evalRead("(array set (array get matrix 0) 1 1)", env));
         assertEquals(null, evalRead("(array set (array get matrix 1) 0 2)", env));
@@ -148,43 +148,52 @@ public class TestObscure {
     @Test
     public void testLambda() throws IOException {
         Env env = Env.create();
-        assertEquals(sym("a"), evalRead("((*lambda (x) (car x)) '(a b))", env));
-        assertEquals(list(sym("a"), sym("b")), evalRead("((*lambda x x) 'a 'b)", env));
-        evalRead("(*define kar (*lambda (x) (car x)))", env);
+        assertEquals(sym("a"), evalRead("((lambda (x) (car x)) '(a b))", env));
+        assertEquals(list(sym("a"), sym("b")), evalRead("((lambda x x) 'a 'b)", env));
+        evalRead("(define kar (lambda (x) (car x)))", env);
         assertEquals(sym("a"), evalRead("(kar '(a b))", env));
-        evalRead("(*define (first x) (car x))", env);
+        evalRead("(define (first x) (car x))", env);
         assertEquals(sym("a"), evalRead("(first '(a b))", env));
-        evalRead("(*define (list . x) x)", env);
+        evalRead("(define (list . x) x)", env);
         assertEquals(list(sym("a"), sym("b")), evalRead("(list 'a 'b)", env));
-        evalRead("(*define (foo a b . x) (list a b x))", env);
+        evalRead("(define (foo a b . x) (list a b x))", env);
         assertEquals(list(sym("a"), sym("b"), list(sym("c"), sym("d"))), evalRead("(foo 'a 'b 'c 'd)", env));
     }
     
     @Test
     public void testMacro() throws IOException {
         Env env = Env.create();
-        evalRead("(*define (list . x) x)", env);
-        evalRead("(*define kar (*macro (x) (list 'car (list 'quote x))))", env);
+        evalRead("(define (list . x) x)", env);
+        evalRead("(define kar (macro (x) (list 'car (list 'quote x))))", env);
         assertEquals(sym("a"), evalRead("(kar (a b))", env));
-        evalRead("(*define-macro (CAR x) (list 'car (list 'quote x)))", env);
+        evalRead("(define-macro (CAR x) (list 'car (list 'quote x)))", env);
         assertEquals(sym("a"), evalRead("(CAR (a b))", env));
     }
     
     @Test
     public void testExpand() throws IOException {
         Env env = Env.create();
-        assertEquals(read("((*lambda (x y) (cons x y)) 0 1)"), evalRead("(*expand (*let ((x 0) (y 1)) (cons x y)))", env));
+        assertEquals(read("((lambda (x y) (cons x y)) 0 1)"), evalRead("(expand (let ((x 0) (y 1)) (cons x y)))", env));
     }
     
     @Test
     public void testLet() throws IOException {
         Env env = Env.create();
-        assertEquals(cons(0, 1), evalRead("(*let ((x 0) (y 1)) (cons x y))", env));
+        assertEquals(cons(0, 1), evalRead("(let ((x 0) (y 1)) (cons x y))", env));
     }
 
     @Test
     public void testAppend() throws IOException {
         Env env = Env.create();
-        assertEquals(list(0, 1, 2, 3), evalRead("('(0 1) append '(2 3))", env));
+        assertEquals(list(0, 1, 2, 3), evalRead("('(0 1) + '(2 3))", env));
+    }
+    
+    @Test
+    public void testAddMacro() throws IOException {
+        Env env = Env.create();
+        assertEquals(100, evalRead("(define x 100)", env));
+        assertEquals(111, evalRead("(+ 1 (* 2 3) 4 x)", env));
+        assertEquals("a123b", evalRead("(+ \"a\" (+ 100 23) 'b)", env));
+        assertEquals(list(0, 1, 2, 3), evalRead("(+ '(0 1) '(2 3))", env));
     }
 }

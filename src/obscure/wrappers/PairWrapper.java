@@ -20,7 +20,7 @@ public class PairWrapper extends AbstractWrapper {
     public PairWrapper() {
         map.put(Symbol.of("car"), (Procedure)(self, args) -> car(self));
         map.put(Symbol.of("cdr"), (Procedure)(self, args) -> cdr(self));
-        map.put(Symbol.of("append"), new Append());
+        map.put(Symbol.of("+"), new Append());
     }
 
 }
