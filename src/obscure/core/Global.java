@@ -15,7 +15,9 @@ public class Global {
         ENV.define(Symbol.of("cons"), new Cons());
         ENV.define(Symbol.of("define"), new Define());
         ENV.define(Symbol.of("defmacro"), new DefMacro());
+        ENV.define(Symbol.of("expand"), new Expand());
         ENV.define(Symbol.of("lambda"), new Lambda());
+        ENV.define(Symbol.of("let"), new Let());
         ENV.define(Symbol.of("macro"), new MakeMacro());
         ENV.define(Symbol.QUOTE, new Quote());
     }

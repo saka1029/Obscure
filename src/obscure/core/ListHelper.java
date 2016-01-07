@@ -4,6 +4,10 @@ public class ListHelper {
 
     private ListHelper() {}
     
+    public static Symbol sym(String name) {
+        return Symbol.of(name);
+    }
+
     public static boolean isList(Object obj) {
         return obj instanceof List;
     }
