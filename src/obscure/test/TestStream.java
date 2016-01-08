@@ -42,6 +42,8 @@ public class TestStream {
         Env env = Env.create();
         evalRead("(define Stream (Class forName \"java.util.stream.Stream\"))", env);
         assertArrayEquals(new Object[] {1, 4, 9},
+            (Object[])evalRead("(((Stream of 1 2 3) map (lambda (x) (* x x))) toArray)", env));
+        assertArrayEquals(new Object[] {1, 4, 9},
             (Object[])evalRead("(; (Stream of 1 2 3) (map (lambda (x) (* x x))) (toArray))", env));
     }
     

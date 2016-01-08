@@ -19,7 +19,7 @@ public class Define implements Applicable {
         if (first instanceof Symbol)
             return env.define((Symbol)first, eval(cadr(args), env));
         else if (first instanceof Pair)
-            return env.define((Symbol)car(first), new Closure(cdr(first), (List)cdr(args), env));
+            return env.define((Symbol)car(first), Closure.of(cdr(first), (List)cdr(args), env));
         else
             throw new ObscureException("cannot define %s", args);
     }

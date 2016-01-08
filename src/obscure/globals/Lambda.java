@@ -11,7 +11,7 @@ public class Lambda implements Applicable {
 
     @Override
     public Object apply(Object self, List args, Env env) {
-        return new Closure(car(args), (List)cdr(args), env);
+        return Closure.of(car(args), (List)cdr(args), env);
     }
 
 }

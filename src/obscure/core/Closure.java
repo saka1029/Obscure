@@ -2,26 +2,36 @@ package obscure.core;
 
 import static obscure.core.ListHelper.*;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntUnaryOperator;
-import java.util.function.LongUnaryOperator;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class Closure implements Procedure,
-        Function<Object, Object>, Predicate<Object>,
-        Consumer<Object>, Supplier<Object>,
-        IntUnaryOperator, LongUnaryOperator {
+public class Closure implements Procedure, Supplier<Object> {
  
     final Object parms;
     final List body;
     final Env env;
 
-    public Closure(Object parms, List body, Env env) {
+    protected Closure(Object parms, List body, Env env) {
         this.parms = parms;
         this.body = body;
         this.env = env;
+    }
+    
+    static int parmsCount(Object parms) {
+        if (isList(parms)) {
+            int sum = 0;
+            for (@SuppressWarnings("unused") Object e : asList(parms))
+                ++sum;
+            return sum;
+        }
+        return -1;
+    }
+
+    public static Closure of(Object parms, List body, Env env) {
+        switch (parmsCount(parms)) {
+            case 1: return new Closure1(parms, body, env);
+            case 2: return new Closure2(parms, body, env);
+            default: return new Closure(parms, body, env);
+        }
     }
     
     static Env pairlis(Object parms, List args, Env env) {
@@ -49,34 +59,12 @@ public class Closure implements Procedure,
         return print(cons(sym("Closure"), cons(parms, body)));
     }
 
-    @Override
-    public boolean test(Object t) {
-        return (boolean)apply(null, list(t));
-    }
-
-    @Override
-    public Object apply(Object t) {
-        return apply(null, list(t));
-    }
-
-    @Override
-    public void accept(Object t) {
-        apply(null, list(t));
-    }
-
+    /**
+     * method for Supplier<Object>
+     */
     @Override
     public Object get() {
         return apply(null, Nil.value);
-    }
-
-    @Override
-    public int applyAsInt(int operand) {
-        return (int)apply(null, list(operand));
-    }
-
-    @Override
-    public long applyAsLong(long operand) {
-        return (long)apply(null, list(operand));
     }
 
 }
