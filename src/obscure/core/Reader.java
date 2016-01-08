@@ -150,7 +150,11 @@ public class Reader {
             sb.append((char)ch);
             get();
         } while (isDigit(ch));
-        return Integer.valueOf(sb.toString());
+        if (Character.toUpperCase(ch) == 'L') {
+            get();
+            return Long.valueOf(sb.toString());
+        } else
+            return Integer.valueOf(sb.toString());
     }
 
     public Object read() throws IOException {

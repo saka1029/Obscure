@@ -21,8 +21,8 @@ public class TestObscure {
 
     static Object evalRead(String s, Env env) throws IOException {
         Object input = read(s);
-        Object output = Global.eval(input, env);
-        System.out.printf("%s -> %s%n", Global.print(input), Global.print(output));
+        Object output = eval(input, env);
+        System.out.printf("%s -> %s%n", print(input), print(output));
         return output;
     }
 

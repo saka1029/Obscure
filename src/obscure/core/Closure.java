@@ -2,7 +2,17 @@ package obscure.core;
 
 import static obscure.core.ListHelper.*;
 
-public class Closure implements Procedure {
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
+import java.util.function.LongUnaryOperator;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+public class Closure implements Procedure,
+        Function<Object, Object>, Predicate<Object>,
+        Consumer<Object>, Supplier<Object>,
+        IntUnaryOperator, LongUnaryOperator {
  
     final Object parms;
     final List body;
@@ -37,6 +47,36 @@ public class Closure implements Procedure {
     @Override
     public String toString() {
         return print(cons(sym("Closure"), cons(parms, body)));
+    }
+
+    @Override
+    public boolean test(Object t) {
+        return (boolean)apply(null, list(t));
+    }
+
+    @Override
+    public Object apply(Object t) {
+        return apply(null, list(t));
+    }
+
+    @Override
+    public void accept(Object t) {
+        apply(null, list(t));
+    }
+
+    @Override
+    public Object get() {
+        return apply(null, Nil.value);
+    }
+
+    @Override
+    public int applyAsInt(int operand) {
+        return (int)apply(null, list(operand));
+    }
+
+    @Override
+    public long applyAsLong(long operand) {
+        return (long)apply(null, list(operand));
     }
 
 }

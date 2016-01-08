@@ -37,6 +37,7 @@ public class Global {
     static {
         add(new PairWrapper());
         add(new IntegerWrapper());
+        add(new LongWrapper());
         add(new StringWrapper());
         add(new CharacterWrapper());
     }

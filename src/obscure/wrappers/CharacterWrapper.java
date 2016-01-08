@@ -1,8 +1,5 @@
 package obscure.wrappers;
 
-import obscure.core.Procedure;
-import obscure.core.Symbol;
-
 public class CharacterWrapper extends AbstractWrapper {
 
     @Override

@@ -18,6 +18,8 @@ public class Pair extends List {
         Object first = Global.eval(car, env);
         if (first instanceof Applicable)
             return ((Applicable)first).apply(null, asList(cdr), env);
+        if (first == null)
+            throw new ObscureException("cannot eval null: %s", print(this));
         Applicable applicable = Global.applicable(first, cdr);
         List args = isPair(cdr) ? asList(asPair(cdr).cdr) : null;
         return applicable.apply(first, args, env);
