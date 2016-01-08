@@ -1,6 +1,6 @@
 package obscure.wrappers;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import obscure.core.Pair;
 import obscure.core.Procedure;
 import obscure.core.Symbol;

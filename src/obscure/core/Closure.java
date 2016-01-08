@@ -1,6 +1,6 @@
 package obscure.core;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 import java.util.function.Supplier;
 

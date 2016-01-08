@@ -3,7 +3,7 @@ package obscure.globals;
 import obscure.core.Applicable;
 import obscure.core.Env;
 import obscure.core.List;
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import obscure.core.MacroClosure;
 
 public class MakeMacro implements Applicable {

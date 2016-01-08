@@ -7,11 +7,11 @@ import obscure.core.ObscureException;
 import obscure.core.Pair;
 import obscure.core.Symbol;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 import obscure.core.Applicable;
 
-public class DefMacro implements Applicable {
+public class DefineMacro implements Applicable {
 
     @Override
     public Object apply(Object self, List args, Env env) {

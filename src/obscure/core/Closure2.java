@@ -1,16 +1,18 @@
 package obscure.core;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
 import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
 
 public class Closure2 extends Closure implements
         BiConsumer<Object, Object>,
         BiFunction<Object, Object, Object>,
+        BinaryOperator<Object>,
         BiPredicate<Object, Object>,
         IntBinaryOperator, LongBinaryOperator {
 

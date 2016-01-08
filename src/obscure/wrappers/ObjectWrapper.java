@@ -16,7 +16,7 @@ import java.util.Map;
 
 import obscure.core.Applicable;
 import obscure.core.List;
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import obscure.core.ObscureException;
 import obscure.core.Procedure;
 import obscure.core.Symbol;

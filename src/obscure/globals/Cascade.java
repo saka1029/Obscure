@@ -1,7 +1,7 @@
 package obscure.globals;
 
 import obscure.core.List;
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 import obscure.core.Env;
 import obscure.core.Macro;

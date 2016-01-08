@@ -1,8 +1,8 @@
 package obscure.core;
 
-public class ListHelper {
+public class Helper {
 
-    private ListHelper() {}
+    private Helper() {}
     
     public static Symbol sym(String name) {
         return Symbol.of(name);

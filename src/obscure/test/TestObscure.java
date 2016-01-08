@@ -10,7 +10,7 @@ import obscure.core.Env;
 import obscure.core.Global;
 import obscure.core.ObscureException;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import obscure.core.Reader;
 
 public class TestObscure {
@@ -180,7 +180,10 @@ public class TestObscure {
     @Test
     public void testLet() throws IOException {
         Env env = Env.create();
-        assertEquals(cons(0, 1), evalRead("(let ((x 0) (y 1)) (cons x y))", env));
+        assertEquals(100, evalRead("(define z 100)", env));
+        assertEquals(list(0, 1, 2), evalRead("(let ((x 0) (y 1)) (define z 2) (list x y z))", env));
+        assertEquals(list(0, 1, 100), evalRead("(let ((x 0) (y 1)) (list x y z))", env));
+        assertEquals(100, evalRead("z", env));
     }
 
     @Test
@@ -211,4 +214,6 @@ public class TestObscure {
     public void testReaderUnterminatedString() throws IOException {
         assertEquals("first\r\nsecond", read("\"first\r\nsecond\""));
     }
+
+    static int foo() { return 1; }
 }

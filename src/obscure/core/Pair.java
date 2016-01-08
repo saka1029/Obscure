@@ -1,7 +1,7 @@
 package obscure.core;
 
 import java.util.Objects;
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 public class Pair extends List {
 

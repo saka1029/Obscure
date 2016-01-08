@@ -3,7 +3,7 @@ package obscure.wrappers;
 import obscure.core.List;
 import obscure.core.Pair;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import obscure.core.Procedure;
 
 public class Append implements Procedure {

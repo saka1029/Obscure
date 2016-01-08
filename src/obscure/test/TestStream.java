@@ -6,7 +6,7 @@ import java.util.function.Function;
 import org.junit.Test;
 
 import obscure.core.Env;
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 import static org.junit.Assert.*;
 
 import obscure.core.Reader;
@@ -52,11 +52,20 @@ public class TestStream {
         Env env = Env.create();
         evalRead("(define IntStream (Class forName \"java.util.stream.IntStream\"))", env);
         assertEquals(3, evalRead("(define c 3)", env));
-        assertArrayEquals(new int[] {4, 7, 12},
-            (int[])evalRead(
+        assertArrayEquals(new int[] {4, 7, 12}, (int[])evalRead(
                     "(; (IntStream of 1 2 3)"
                     + "(map (lambda (x) (+ c (* x x))))"
                     + "(toArray))", env));
+    }
+    
+    @Test
+    public void testIntStreamIntBinaryOperator() throws IOException {
+        Env env = Env.create();
+        evalRead("(define IntStream (Class forName \"java.util.stream.IntStream\"))", env);
+        assertEquals(24, evalRead(
+                    "(; (IntStream of 1 2 3 4)"
+                    + "(reduce (lambda (x y) (* x y)))"
+                    + "(getAsInt))", env));
     }
     
     @Test
@@ -64,11 +73,22 @@ public class TestStream {
         Env env = Env.create();
         evalRead("(define LongStream (Class forName \"java.util.stream.LongStream\"))", env);
         assertEquals(3L, evalRead("(define c 3L)", env));
-        assertArrayEquals(new long[] {4, 7, 12},
-            (long[])evalRead(
+        assertArrayEquals(new long[] {4, 7, 12}, (long[])evalRead(
                     "(; (LongStream of 1L 2L 3L)"
                     + "(map (lambda (x) (+ c (* x x))))"
                     + "(toArray))", env));
     }
+    
+    @Test
+    public void testStreamBiFunction() throws IOException {
+        Env env = Env.create();
+        evalRead("(define Stream (Class forName \"java.util.stream.Stream\"))", env);
+        assertEquals("abc", evalRead(
+                    "(; (Stream of \"a\" \"b\" \"c\")"
+                    + "(reduce (lambda (x y) (+ x y)))"
+                    + "(get))", env));
+    }
+
+    int boo() { return TestObscure.foo(); }
 
 }

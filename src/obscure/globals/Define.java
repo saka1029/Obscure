@@ -7,7 +7,7 @@ import obscure.core.ObscureException;
 import obscure.core.Pair;
 import obscure.core.Symbol;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 import obscure.core.Applicable;
 

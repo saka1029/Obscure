@@ -5,7 +5,7 @@ import obscure.core.Env;
 import obscure.core.List;
 import obscure.core.Macro;
 
-import static obscure.core.ListHelper.*;
+import static obscure.core.Helper.*;
 
 public class Expand implements Applicable {
 
