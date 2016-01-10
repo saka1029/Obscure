@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import obscure.core.Applicable;
+
 import static obscure.core.Helper.*;
 import obscure.core.Symbol;
 import obscure.core.Wrapper;

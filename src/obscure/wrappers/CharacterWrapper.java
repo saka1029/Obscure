@@ -7,11 +7,6 @@ public class CharacterWrapper extends AbstractWrapper {
         return Character.class;
     }
 
-    @Override
-    public Class<?> parentClass() {
-        return Object.class;
-    }
-
     public CharacterWrapper() {
     }
 

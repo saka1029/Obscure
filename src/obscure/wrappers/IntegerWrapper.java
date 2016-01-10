@@ -10,11 +10,6 @@ public class IntegerWrapper extends AbstractWrapper {
         return Integer.class;
     }
 
-    @Override
-    public Class<?> parentClass() {
-        return Object.class;
-    }
-
     public IntegerWrapper() {
         map.put(Symbol.of("+"), (Procedure) ((self, args) -> {
             int sum = 0;

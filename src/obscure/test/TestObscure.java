@@ -181,6 +181,7 @@ public class TestObscure {
     public void testLet() throws IOException {
         Env env = Env.create();
         assertEquals(100, evalRead("(define z 100)", env));
+        evalRead("(define (list . x) x)", env);
         assertEquals(list(0, 1, 2), evalRead("(let ((x 0) (y 1)) (define z 2) (list x y z))", env));
         assertEquals(list(0, 1, 100), evalRead("(let ((x 0) (y 1)) (list x y z))", env));
         assertEquals(100, evalRead("z", env));

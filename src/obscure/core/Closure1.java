@@ -6,12 +6,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongUnaryOperator;
+import java.util.function.UnaryOperator;
 import java.util.function.Predicate;
 
 public class Closure1 extends Closure implements
         Consumer<Object>,
         Function<Object, Object>,
         Predicate<Object>,
+        UnaryOperator<Object>,
         IntUnaryOperator, LongUnaryOperator {
 
     protected Closure1(Object parms, List body, Env env) {

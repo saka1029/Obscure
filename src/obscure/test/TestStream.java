@@ -89,6 +89,32 @@ public class TestStream {
                     + "(get))", env));
     }
 
-    int boo() { return TestObscure.foo(); }
+    @Test
+    public void testSupplier() throws IOException {
+        Env env = Env.create();
+        evalRead("(define Stream (Class forName \"java.util.stream.Stream\"))", env);
+        assertEquals(100, evalRead("(define c 100)", env));
+        assertArrayEquals(new Object[] {1, 2, 3, 4}, (Object[])evalRead(
+            "(let ((c 0))"
+                + "(; (Stream generate (lambda () (set c (+ c 1))))"
+                + "(limit 4L)"
+                + "(toArray)))", env));
+        assertEquals(100, evalRead("c", env));
+    }
 
+    static String stringX(String s) {
+        return s.replaceAll("(?!^)x(?!$)", "");
+    }
+
+    static String stringX2(String s) {
+        int l = s.length();
+        return l <= 2 ? s : s.substring(0, 1) + s.substring(1, l - 1).replaceAll("x", "")+ s.substring(l - 1);
+    }
+
+    @Test
+    public void testLengthOfLongestSubstring() {
+        System.out.println(stringX("xxHxix") + ":" + stringX2("xxHxix"));
+        System.out.println(stringX("abxxxcd") + ":" + stringX2("abxxxcd"));
+        System.out.println(stringX("xabxxxcdx") + ":" + stringX2("xabxxxcdx"));
+    }
 }

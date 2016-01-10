@@ -12,11 +12,6 @@ public class PairWrapper extends AbstractWrapper {
         return Pair.class;
     }
 
-    @Override
-    public Class<?> parentClass() {
-        return Object.class;
-    }
-
     public PairWrapper() {
         map.put(Symbol.of("car"), (Procedure)(self, args) -> car(self));
         map.put(Symbol.of("cdr"), (Procedure)(self, args) -> cdr(self));

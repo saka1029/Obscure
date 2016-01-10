@@ -10,11 +10,6 @@ public class LongWrapper extends AbstractWrapper {
         return Long.class;
     }
 
-    @Override
-    public Class<?> parentClass() {
-        return Object.class;
-    }
-
     public LongWrapper() {
         map.put(Symbol.of("+"), (Procedure) ((self, args) -> {
             long sum = 0;

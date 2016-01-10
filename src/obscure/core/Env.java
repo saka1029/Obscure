@@ -41,9 +41,10 @@ class MapEnv implements Env {
 
     @Override
     public Object set(Symbol key, Object value) {
-        if (map.containsKey(key))
-            return map.put(key, value);
-        else if (parent != null)
+        if (map.containsKey(key)) {
+            map.put(key, value);
+            return value;
+        } else if (parent != null)
             return parent.set(key, value);
         else
             throw new ObscureException("Symbol(%s) not found", key);

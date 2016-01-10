@@ -10,11 +10,6 @@ public class StringWrapper extends AbstractWrapper {
         return String.class;
     }
 
-    @Override
-    public Class<?> parentClass() {
-        return Object.class;
-    }
-
     public StringWrapper() {
         map.put(Symbol.of("+"), (Procedure) ((self, args) -> {
             StringBuilder sb = new StringBuilder();

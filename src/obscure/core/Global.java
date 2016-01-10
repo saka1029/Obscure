@@ -2,6 +2,7 @@ package obscure.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import obscure.globals.*;
 import static obscure.core.Helper.*;
@@ -13,6 +14,7 @@ public class Global {
     static {
         ENV.define(Symbol.of(";"), new Cascade());
         ENV.define(Symbol.of("+"), (Macro)(args, env) -> cons(car(args), cons(Symbol.of("+"), cdr(args))));
+        ENV.define(Symbol.of("=="), (Procedure)(args, env) -> Objects.equals(car(args), cadr(args)));
         ENV.define(Symbol.of("*"), new Multiply());
         ENV.define(Symbol.of("Class"), Class.class);
         ENV.define(Symbol.of("car"), (Procedure)(self, args) -> car(car(args)));
@@ -24,6 +26,7 @@ public class Global {
         ENV.define(Symbol.of("let"), new Let());
         ENV.define(Symbol.of("macro"), new MakeMacro());
         ENV.define(Symbol.QUOTE, (Applicable)(self, args, env) -> car(args));
+        ENV.define(Symbol.of("set"), (Applicable)(self, args, env) -> env.set((Symbol)car(args), eval(cadr(args), env)));
     }
 
     static final Map<Class<?>, Wrapper> map = new HashMap<>();
@@ -50,10 +53,11 @@ public class Global {
 
     public static Applicable applicable(Object self, Object args) {
         Class<?> cls = self.getClass();
-        for (Wrapper w = map.get(cls); w != null; w = map.get(w.parentClass())) {
-            Applicable r = w.applicable(self, args);
-            if (r != null)
-                return r;
+        Wrapper w = map.get(cls);
+        if (w != null) {
+            Applicable a = w.applicable(self, args);
+            if (a != null)
+                return a;
         }
         return objectWrapper.applicable(self, args);
     }
@@ -62,7 +66,8 @@ public class Global {
         if (self == null)
             return "null";
         Class<?> cls = self.getClass();
-        for (Wrapper w = map.get(cls); w != null; w = map.get(w.parentClass())) {
+        Wrapper w = map.get(cls);
+        if (w !=  null) {
             String r = w.print(self);
             if (r != null)
                 return r;

@@ -8,6 +8,13 @@ public abstract class List implements Evalable, Iterable<Object> {
     public abstract Object car();
     public abstract Object cdr();
     
+    public int size() {
+        int size = 0;
+        for (List e = this; e instanceof Pair; e = (List)e.cdr())
+            ++size;
+        return size;
+    }
+
     @Override
     public Iterator<Object> iterator() {
         return new Iterator<Object>() {
