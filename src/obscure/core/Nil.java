@@ -12,9 +12,9 @@ public class Nil extends List {
         return "()";
     }
 
-    @Override public Object car() { throw new ObscureException("cannot get car for Nil"); }
+    @Override public Object car() { throw new ObscureException("cannot get car for ()"); }
 
-    @Override public Object cdr() { throw new ObscureException("cannot get cdr for Nil"); }
+    @Override public Object cdr() { throw new ObscureException("cannot get cdr for ()"); }
 
     @Override public Object eval(Env env) { return this; }
 
