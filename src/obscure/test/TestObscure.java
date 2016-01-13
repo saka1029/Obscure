@@ -51,6 +51,7 @@ public class TestObscure {
         assertEquals(String.class, evalRead("(define String (\"\" getClass))", env));
         assertEquals("a0001", evalRead("(String format \"a%04d\" 1)", env));
         assertEquals("f123x", evalRead("(String format \"f%d%s\" 123 \"x\")", env));
+        assertEquals("fnullx", evalRead("(String format \"f%s%s\" null \"x\")", env));
     }
 
     @Test
@@ -216,5 +217,11 @@ public class TestObscure {
         assertEquals("first\r\nsecond", read("\"first\r\nsecond\""));
     }
 
-    static int foo() { return 1; }
+    @Test
+    public void testPairWrapper() throws IOException {
+        Env env = Env.create();
+        assertEquals(sym("a"), evalRead("('(a b) car)", env));
+        assertEquals(list(sym("b")), evalRead("('(a b) cdr)", env));
+        assertEquals(list(sym("a"), sym("b")), evalRead("('(a) + '(b))", env));
+    }
 }

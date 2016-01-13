@@ -39,4 +39,12 @@ public abstract class List implements Evalable, Iterable<Object> {
         };
     }
     
+    public Object[] toArray() {
+        Object[] r = new Object[size()];
+        int i = 0;
+        for (Object e : this)
+            r[i++] = e;
+        return r;
+    }
+    
 }
