@@ -7,7 +7,7 @@ import java.util.List;
 public class Define implements Applicable {
 
     @Override
-    public Object apply(Object self, List<Object> args, Environment env) {
+    public Object apply(Object self, List<Object> args, Env env) {
         Object first = car(args);
         if (isSymbol(first))
             return env.define(asSymbol(first), eval(cadr(args), env));

@@ -3,31 +3,15 @@ package io.github.saka1029.obscure.core;
 import java.util.HashMap;
 import java.util.Map;
 
-public interface Environment {
-
-    Object get(Symbol key);
-    Object define(Symbol key, Object value);
-    Object set(Symbol key, Object value);
-    
-    public static Environment create() {
-        return new MapEnvironment(Obscure.GLOBAL);
-    }
-
-    public static Environment create(Environment parent) {
-        return new MapEnvironment(parent);
-    }
-
-}
-
-class MapEnvironment implements Environment {
+public class MapEnv implements Env {
 
     private final Map<Symbol, Object> map = new HashMap<>();
-    private final Environment parent;
+    private final Env parent;
     
-    MapEnvironment(Environment parent) {
+    MapEnv(Env parent) {
         this.parent = parent;
     }
-
+    
     @Override
     public Object get(Symbol key) {
         Object value = map.get(key);

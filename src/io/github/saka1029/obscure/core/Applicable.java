@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface Applicable {
 
-    Object apply(Object self, List<Object> args, Environment env);
+    Object apply(Object self, List<Object> args, Env env);
 
 }

@@ -15,7 +15,9 @@ public class Reflection {
 
     private Reflection() {}
     
-    public static final Object NOT_FOUND = new Object();
+    public static final Object NOT_FOUND = new Object() {
+        @Override public String toString() { return "NOT_FOUND"; };
+    };
 
     private static Object field(Object self, String name, Class<?> clas) {
         try {

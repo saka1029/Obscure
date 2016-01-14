@@ -9,19 +9,15 @@ public class Closure implements Procedure, Supplier<Object> {
  
     final List<Object> parms;
     final List<Object> body;
-    final Environment env;
+    final Env env;
 
-    protected Closure(List<Object> parms, List<Object> body, Environment env) {
+    protected Closure(List<Object> parms, List<Object> body, Env env) {
         this.parms = parms;
         this.body = body;
         this.env = env;
     }
     
-    static int parmsCount(Object parms) {
-        return isList(parms) ? asList(parms).size() : -1;
-    }
-
-    public static Closure of(List<Object> parms, List<Object> body, Environment env) {
+    public static Closure of(List<Object> parms, List<Object> body, Env env) {
         switch (parms.size()) {
             case 1: return new Closure1(parms, body, env);
             case 2: return new Closure2(parms, body, env);
@@ -29,8 +25,8 @@ public class Closure implements Procedure, Supplier<Object> {
         }
     }
     
-    static Environment pairlis(List<Object> parms, List<Object> args, Environment env) {
-        Environment n = env(env);
+    static Env pairlis(List<Object> parms, List<Object> args, Env env) {
+        Env n = env(env);
         for (int i = 0, size = parms.size(); i < size; ++i)
             n.define(asSymbol(parms.get(i)), args.get(i));
         return n;
@@ -39,7 +35,7 @@ public class Closure implements Procedure, Supplier<Object> {
     @Override
     public Object apply(Object self, List<Object> args) {
         Object r = null;
-        Environment n = pairlis(parms, args, env);
+        Env n = pairlis(parms, args, env);
         for (Object e : body)
             r = eval(e, n);
         return r;

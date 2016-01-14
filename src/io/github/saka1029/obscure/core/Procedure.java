@@ -9,14 +9,14 @@ public interface Procedure extends Applicable {
 
     Object apply(Object self, List<Object> args);
 
-    static List<Object> evlis(List<Object> args, Environment env) {
+    static List<Object> evlis(List<Object> args, Env env) {
         return args.stream()
             .map(e -> eval(e, env))
             .collect(Collectors.toList());
     }
 
     @Override
-    public default Object apply(Object self, List<Object> args, Environment env) {
+    public default Object apply(Object self, List<Object> args, Env env) {
         return apply(self, evlis(args, env));
     }
 

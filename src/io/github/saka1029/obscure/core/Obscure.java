@@ -2,24 +2,68 @@ package io.github.saka1029.obscure.core;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Obscure {
 
     private Obscure() {}
     
-    public static Object eval(Object object, Environment env) {
+    static Object invoke(Object target, Object invoke, Env env) {
+        Class<?> clas = target.getClass();
+        if (CLASS_ENV.containsKey(clas)) {
+            Env cenv = CLASS_ENV.get(clas);
+            if (cenv != null)
+                if (isSymbol(invoke))
+                    return cenv.get((Symbol)invoke);
+                else if (isList(invoke)) {
+                    Object app = cenv.get((Symbol)car(invoke));
+                    if (app instanceof Applicable)
+                        return ((Applicable)app).apply(target, cdr(invoke), env);
+                }
+        }
+        if (isSymbol(invoke)) {
+            String name = asSymbol(invoke).name;
+             Object result = Reflection.field(target, name);
+             if (result == Reflection.NOT_FOUND)
+                 throw new ObscureException("no such field %s", name);
+             return result;
+        } else if (isList(invoke)) {
+            List<Object> invokeList = asList(invoke);
+            Object first = invokeList.get(0);
+            if (isSymbol(first)) {
+                String name = asSymbol(first).name;
+                Procedure method;
+                if (name.equals("new"))
+                    method = (self, args) -> Reflection.constructor(self, args);
+                else
+                    method = (self, args) -> Reflection.method(self, name, args);
+                Object result = method.apply(target, cdr(invokeList));
+                if (result == Reflection.NOT_FOUND)
+                    throw new ObscureException("method %s not found", first);
+                return result;
+            } else
+                throw  new ObscureException("method must be symbol but %s", first);
+              
+        } else
+            throw new ObscureException("cannot invoke %s", invoke);
+    }
+
+    public static Object eval(Object object, Env env) {
         if (isSymbol(object))
             return env.get(asSymbol(object));
         if (isList(object)) {
             List<Object> list = asList(object);
-            if (list.size() <= 0)
+            int size = list.size();
+            if (size <= 0)
                 return object;
-            Object first = eval(car(list), env);
-            if (first instanceof Applicable)
-                return ((Applicable)first).apply(null, cdr(list), env);
-            else
-                throw new ObscureException("cannot eval %s", object);
+            Object result = eval(car(list), env);
+            if (result instanceof Applicable)
+                return ((Applicable)result).apply(null, cdr(list), env);
+            for (int i = 1; i < size; ++i)
+                result = invoke(result, list.get(i), env);
+            return result;
         }
         return object;
     }
@@ -28,22 +72,36 @@ public class Obscure {
         return String.valueOf(object);
     }
  
-    static final Environment GLOBAL = Environment.create(null);
-    
+    static final Env GLOBAL_ENV = new MapEnv(null);
+ 
     static {
-        GLOBAL.define(sym("quote"), (Applicable)(self, args, env) -> car(args));
-        GLOBAL.define(sym("car"), (Procedure)(self, args) -> car(car(args)));
-        GLOBAL.define(sym("cdr"), (Procedure)(self, args) -> cdr(car(args)));
-        GLOBAL.define(sym("lambda"), (Applicable)(self, args, env) -> Closure.of(asList(car(args)), cdr(args), env));
-        GLOBAL.define(sym("define"), new Define());
+        GLOBAL_ENV.define(sym("quote"), (Applicable)(self, args, env) -> car(args));
+        GLOBAL_ENV.define(sym("car"), (Procedure)(self, args) -> car(car(args)));
+        GLOBAL_ENV.define(sym("cdr"), (Procedure)(self, args) -> cdr(car(args)));
+        GLOBAL_ENV.define(sym("lambda"), (Applicable)(self, args, env) -> Closure.of(asList(car(args)), cdr(args), env));
+        GLOBAL_ENV.define(sym("define"), new Define());
+        GLOBAL_ENV.define(sym("Class"), Class.class);
+        GLOBAL_ENV.define(sym("+"), new GenericOperator(sym("+")));
     }
+ 
+    static final Map<Class<?>, Env> CLASS_ENV = new HashMap<>();
+    static {
+        CLASS_ENV.put(String.class, new MapEnv(null) {{
+            define(sym("+"), (Procedure) (self, args) -> "" + self + car(args));
+        }});
+        CLASS_ENV.put(Integer.class, new MapEnv(null) {{
+            define(sym("+"), (Procedure) (self, args) -> ((int)self) + ((int)car(args)));
+        }});
+    }
+ 
+    // Helper functions
 
-    public static Environment env() {
-        return Environment.create();
+    public static Env env() {
+        return new MapEnv(GLOBAL_ENV);
     }
     
-    public static Environment env(Environment env) {
-        return Environment.create(env);
+    public static Env env(Env env) {
+        return new MapEnv(env);
     }
     
     public static boolean isList(Object object) {

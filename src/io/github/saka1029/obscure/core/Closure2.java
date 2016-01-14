@@ -17,7 +17,7 @@ public class Closure2 extends Closure implements
         BiPredicate<Object, Object>,
         IntBinaryOperator, LongBinaryOperator {
 
-    protected Closure2(List<Object> parms, List<Object> body, Environment env) {
+    protected Closure2(List<Object> parms, List<Object> body, Env env) {
         super(parms, body, env);
     }
 
