@@ -50,10 +50,32 @@ public class TestObscure {
         assertEquals("abcXYZ", eval(read("(+ \"ab\" \"c\" \"X\" (+ \"Y\" \"Z\"))"), env));
     }
     
+    static String encode(String s) {
+        return Integer.toString(s.hashCode() & 0xffffff, 36) + "#" + s;
+    }
+    
+    static String decode(String s) {
+        return s.replaceFirst("^[^#]*#", "");
+    }
+
+    void test(String url) {
+        System.out.println(url +" -> " + encode(url) + " -> " + decode(encode(url)));
+    }
+
     @Test
     public void testInteger() throws IOException {
         Env env = env();
         assertEquals(3, eval(read("(1 (+ 2))"), env));
         assertEquals(10, eval(read("(+ 1 2 3 (+ 2 2))"), env));
+        System.out.println(eval(read("(1 +)"), env));
+        test("http://facebook.com/");
+        test("http://microsoft.com/");
+        test("http://google.com/");
+    }
+    
+    @Test
+    public void testLet() throws IOException {
+        Env env = env();
+        assertEquals(3, eval(read("(let ((x 1) (y 2)) (+ x y))"), env));
     }
 }

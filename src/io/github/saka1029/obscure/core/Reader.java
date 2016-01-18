@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Reader {
 
+    static final Object EOF_OBJECT = new Object();
     static final int EOF = -1;
     int ch;
     
@@ -117,6 +118,7 @@ public class Reader {
                 case '"': get(); return sb.toString();
                 case '\\': sb.append(readEscape()); break;
                 case '\b': case '\f': case '\r': case '\n':
+                    get();
                     throw new ObscureException("unterminated string literal %s", sb);
                 default: sb.append((char)ch); get(); break;
             }
@@ -127,7 +129,8 @@ public class Reader {
         switch (get()) {
             case '\\': return readEscape();
                 case '\b': case '\f': case '\r': case '\n':
-                throw new ObscureException("unterminated character literal");
+                    get();
+                    throw new ObscureException("unterminated character literal");
             default:
                 char r = (char)ch;
                 get();
@@ -142,9 +145,11 @@ public class Reader {
             get();
         } while (isRestSymbol(ch));
         String s = sb.toString();
-        if (s.equals("true")) return Boolean.TRUE;
-        else if (s.equals("false")) return Boolean.FALSE;
-        else if (s.equals("null")) return null;
+        switch (s) {
+            case "true": return Boolean.TRUE;
+            case "false": return Boolean.FALSE;
+            case "null": return null;
+        }
         return Symbol.of(s);
     }
     
@@ -168,14 +173,16 @@ public class Reader {
             case '\'': return readQuote();
             case '"': return readString();
             case '?': return readChar();
-            case EOF: throw new ObscureException("unexpected EOF");
+            case EOF: return EOF_OBJECT;
             default:
                 if (isFirstSymbol(ch))
                     return readSymbol();
                 else if (isDigit(ch))
                     return readNumber();
-                else
+                else {
+                    get();
                     throw new ObscureException("unknown charcter '%s'", (char)ch);
+                }
         }
         
     }

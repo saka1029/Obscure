@@ -1,6 +1,7 @@
 package io.github.saka1029.obscure.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +52,7 @@ public class Obscure {
     }
 
     public static Object eval(Object object, Env env) {
+        System.out.println("eval: " + object);
         if (isSymbol(object))
             return env.get(asSymbol(object));
         if (isList(object)) {
@@ -75,16 +77,19 @@ public class Obscure {
     static final Env GLOBAL_ENV = new MapEnv(null);
  
     static {
+        GLOBAL_ENV.define(sym("quit"), Reader.EOF_OBJECT);
         GLOBAL_ENV.define(sym("quote"), (Applicable)(self, args, env) -> car(args));
         GLOBAL_ENV.define(sym("car"), (Procedure)(self, args) -> car(car(args)));
         GLOBAL_ENV.define(sym("cdr"), (Procedure)(self, args) -> cdr(car(args)));
         GLOBAL_ENV.define(sym("lambda"), (Applicable)(self, args, env) -> Closure.of(asList(car(args)), cdr(args), env));
         GLOBAL_ENV.define(sym("define"), new Define());
+        GLOBAL_ENV.define(sym("let"), new Let());
         GLOBAL_ENV.define(sym("Class"), Class.class);
         GLOBAL_ENV.define(sym("+"), new GenericOperator(sym("+")));
     }
  
     static final Map<Class<?>, Env> CLASS_ENV = new HashMap<>();
+
     static {
         CLASS_ENV.put(String.class, new MapEnv(null) {{
             define(sym("+"), (Procedure) (self, args) -> "" + self + car(args));
@@ -114,11 +119,23 @@ public class Obscure {
     }
 
     public static List<Object> list(Object... args) {
-        return Arrays.asList(args);
+        List<Object> r = new ArrayList<>();
+        for (Object e : args)
+            r.add(e);
+        return r;
+    }
+    
+    public static List<Object> append(List<Object> a, List<Object> b) {
+        a.addAll(b);
+        return a;
     }
     
     public static List<Object> cdr(Object list) {
         return ImmutableList.cdr(asList(list));
+    }
+ 
+    public static List<Object> cdr(Object list, int n) {
+        return ImmutableList.cdr(asList(list), n);
     }
  
     public static Object car(Object list) {
@@ -130,7 +147,11 @@ public class Obscure {
     }
     
     public static Object caddr(Object list) {
-        return car(cdr(cdr(list)));
+        return car(cdr(list, 2));
+    }
+    
+    public static Object cadddr(Object list) {
+        return car(cdr(list, 3));
     }
     
     public static Object read(String s) throws IOException {

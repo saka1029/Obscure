@@ -27,10 +27,15 @@ public class ImmutableList extends AbstractList<Object> {
         return new ImmutableList(list, 0);
     }
  
+    public static ImmutableList cdr(List<Object> list, int n) {
+        if (list.size() < n)
+            throw new IllegalArgumentException(
+                String.format("cannot %s cdr of ()", n));
+        return new ImmutableList(list, n);
+    }
+
     public static ImmutableList cdr(List<Object> list) {
-        if (list.size() <= 0)
-            throw new IllegalArgumentException("cannot cdr of ()");
-        return new ImmutableList(list, 1);
+        return cdr(list, 1);
     }
 
 }
