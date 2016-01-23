@@ -1,7 +1,0 @@
-setlocal
-
-set BASE=io.github.saka1029
-
-java -cp bin %BASE%.script.CommandRunner -p %BASE%.obscure.core.ObscureProcessor
-
-endlocal

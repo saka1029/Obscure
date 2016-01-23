@@ -7,19 +7,12 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.github.saka1029.obscure.core.Env;
-import com.github.saka1029.obscure.core.Global;
-import com.github.saka1029.obscure.core.Reader;
+import static com.github.saka1029.obscure.core.Global.*;
 
 public class TestPerson {
 
-    Object read(String s) throws IOException {
-        return new Reader(s).read();
-    }
+    static Env env = Env.create();
     
-    Object eval(Object obj, Env env) {
-        return Global.eval(obj, env);
-    }
-
     public static class Person {
 
         public String name;
@@ -51,7 +44,6 @@ public class TestPerson {
 
     @Test
     public void test() throws IOException {
-        Env env = Env.create();
         eval(read("(define Person (Class (forName \"" + Person.class.getName() + "\")))"), env);
         eval(read("(define jhon (Person (new \"Jhon\")))"), env);
         assertEquals("Jhon", eval(read("(jhon name)"), env));
@@ -59,6 +51,9 @@ public class TestPerson {
         assertEquals("Person(Jhon)", eval(read("(jhon (toString))"), env));
         assertEquals(2, eval(read("(Person VERSION)"), env));
         assertEquals("Person(Jane)", eval(read("(Person (of \"Jane\") (toString))"), env));
+//        assertEquals(3, eval(read("(p 3)"), env));
+        assertArrayEquals(new int[]{1, 2, 3}, (int[])eval(read("(Class (forName \"java.util.stream.IntStream\") (of 1 2 3) (toArray))"), env));
+
     }
 
 }

@@ -35,6 +35,10 @@ public class Reader {
     static boolean isRestSymbol(int ch) {
         if (isFirstSymbol(ch)) return true;
         if (isDigit(ch)) return true;
+        switch (ch) {
+            case '?':
+                return true;
+        }
         return false;
     }
 
@@ -77,6 +81,8 @@ public class Reader {
                         throw new ObscureException("')' expected");
                     get();
                     return b.build();
+                case -1:
+                    throw new ObscureException("')' expected");
                 default:
                     b.tail(read());
                     break;
@@ -157,6 +163,33 @@ public class Reader {
         if (Character.toUpperCase(ch) == 'L') {
             get();
             return Long.valueOf(sb.toString());
+        } else if (ch == '.') {
+            sb.append((char)ch);
+            get();
+            while (isDigit(ch)) {
+                sb.append((char)ch);
+                get();
+            }
+            if (Character.toUpperCase(ch) == 'E') {
+                sb.append((char)ch);
+                get();
+                if (ch == '+' || ch == '-') {
+                    sb.append((char)ch);
+                    get();
+                }
+                while (isDigit(ch)) {
+                    sb.append((char)ch);
+                    get();
+                }
+            }
+            if (Character.toUpperCase(ch) == 'F') {
+                get();
+                return Float.valueOf(sb.toString());
+            } else if (Character.toUpperCase(ch) == 'D') {
+                get();
+                return Double.valueOf(sb.toString());
+            } else
+                return Double.valueOf(sb.toString());
         } else
             return Integer.valueOf(sb.toString());
     }

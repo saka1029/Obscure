@@ -1,5 +1,7 @@
 package com.github.saka1029.obscure.core;
 
+import java.util.Objects;
+
 public class Pair extends List {
 
     Object car, cdr;
@@ -28,7 +30,10 @@ public class Pair extends List {
         Symbol name = (Symbol)car;
         Applicable method;
         Object value = null;
-        Env classEnv = Global.CLASS_ENV.get(self.getClass());
+        Class<?> cls = self.getClass();
+        if (cls.isArray())
+            cls = Object[].class;
+        Env classEnv = Global.CLASS_ENV.get(cls);
         if (classEnv != null)
             value = classEnv.get(name);
         if (value instanceof Applicable)
@@ -62,6 +67,14 @@ public class Pair extends List {
     @Override
     public Object cdr() {
         return cdr;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Pair))
+            return false;
+        Pair o = (Pair)obj;
+        return Objects.equals(o.car, car) && Objects.equals(o.cdr, cdr);
     }
 
     @Override
