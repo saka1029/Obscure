@@ -11,7 +11,7 @@ public class GenericOperator implements Macro {
     }
 
     @Override
-    public Object expand(List args, Env env) {
+    public Object expand(List args) {
         Pair.Builder r = Pair.builder();
         r.tail(car(args));
         for (Object e = cdr(args); e instanceof Pair; e = cdr(e))

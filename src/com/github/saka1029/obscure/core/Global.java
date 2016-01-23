@@ -76,7 +76,7 @@ public class Global {
                 throw new ObscureException("cannot define %s", args);
         });
         defineGlobal("lambda", (Applicable)(self, args, env) -> Closure.of((List)car(args), (List)cdr(args), env));
-        defineGlobal("let", (Macro)(args, env) -> {
+        defineGlobal("let", (Macro)(args) -> {
             Pair.Builder parms = Pair.builder();
             Pair.Builder actual = Pair.builder();
             for (Object e : (List)car(args)) {
@@ -88,11 +88,16 @@ public class Global {
         });
         defineGlobal("quote", (Applicable)(self, args, env) -> car(args));
         defineGlobal("+", new GenericOperator(Symbol.of("+")));
+        defineGlobal("-", new GenericOperator(Symbol.of("-")));
+        defineGlobal("*", new GenericOperator(Symbol.of("*")));
         defineGlobal("<", new GenericOperator(Symbol.of("<")));
     
         defineClass(Integer.class, "+", (Procedure)(self, args) -> ((int)self) + ((int)car(args)));
+        defineClass(Integer.class, "-", (Procedure)(self, args) -> ((int)self) - ((int)car(args)));
+        defineClass(Integer.class, "*", (Procedure)(self, args) -> ((int)self) * ((int)car(args)));
         defineClass(Integer.class, "<", (Procedure)(self, args) -> ((int)self) < ((int)car(args)));
         defineClass(String.class, "+", (Procedure)(self, args) -> ((String)self) + car(args));
+        defineClass(String.class, "<", (Procedure)(self, args) -> ((String)self).compareTo((String)car(args)) < 0);
     }
     
     public static Object car(Object obj) {

@@ -56,5 +56,25 @@ public class TestPair {
             + "            (append (cdr a) b)))))"), env);
         assertEquals(list(1, 2, 3, 4), eval(read("(append '(1 2) '(3 4))"), env));
     }
+    
+    @Test
+    public void testFact() throws IOException {
+        eval(read(
+            "(define (fact n)"
+            + "  (if (< n 1)"
+            + "      1"
+            + "      (* (fact (- n 1)) n)))"), env);
+        assertEquals(6, eval(read("(fact 3)"), env));
+    }
+    
+    @Test
+    public void testFactMethod() throws IOException {
+        eval(read(
+            "(define (fact n)"
+            + "  ((n (< 1)) (if"
+            + "      1"
+            + "      ((fact (n (- 1))) (* n)))))"), env);
+        assertEquals(6, eval(read("(fact 3)"), env));
+    }
 
 }

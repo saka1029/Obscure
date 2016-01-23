@@ -1,4 +1,4 @@
-package obscure.test;
+package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import org.junit.Test;
 
-import obscure.core.Reflection;
+import com.github.saka1029.obscure.core.Reflection;
 
 public class TestReflection {
 
@@ -37,6 +37,10 @@ public class TestReflection {
         }
     }
 
+    static Object[] list(Object... args) {
+        return args;
+    }
+
     @Test
     public void testInstanceField() {
         assertEquals("Jhon", Reflection.field(new Person("Jhon"), "name"));
@@ -51,14 +55,14 @@ public class TestReflection {
     
     @Test
     public void testConstructor() {
-        assertEquals(new Person("Jhon"), Reflection.constructor(Person.class, "Jhon"));
-        assertEquals(Reflection.NOT_FOUND, Reflection.constructor(Person.class));
+        assertEquals(new Person("Jhon"), Reflection.constructor(Person.class, list("Jhon")));
+        assertEquals(Reflection.NOT_FOUND, Reflection.constructor(Person.class, list()));
     }
 
     @Test
     public void testInstanceMethod() {
-        assertEquals("Hello Jhon", Reflection.method(new Person("Jhon"), "greeting", "Hello"));
-        assertEquals(Reflection.NOT_FOUND, Reflection.method(new Person("Jhon"), "hello", "Hello"));
+        assertEquals("Hello Jhon", Reflection.method(new Person("Jhon"), "greeting", list("Hello")));
+        assertEquals(Reflection.NOT_FOUND, Reflection.method(new Person("Jhon"), "hello", list("Hello")));
     }
 
 }
