@@ -18,8 +18,10 @@ public class TestLet {
    
     @Test
     public void testLet() throws IOException {
+        DEBUG = true;
         assertEquals(3, eval(read("(let ((x 1) (y 2)) (+ x y))"), env));
         assertEquals(Pair.of(1, 2), eval(read("(let ((x 1) (y 2)) (cons x y))"), env));
+        DEBUG = false;
     }
 
 }

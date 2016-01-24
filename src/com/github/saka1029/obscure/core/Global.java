@@ -6,27 +6,32 @@ import java.util.Map;
 
 public class Global {
 
+    public static boolean DEBUG = false;
+    
     public static Object read(String s) throws IOException {
         return new Reader(s).read();
     }
 
     static int INDENT = 0;
-    static final String SPACES = String.format("%400s", "");
+    static final String SPACES = String.format("%4000s", "");
 
     static String indent(int n) {
         return SPACES.substring(0, n * 2);
     }
 
     public static Object eval(Object obj, Env env) {
-        System.out.printf("%s>eval %s%n", indent(INDENT++), obj);
+        if (DEBUG)
+            System.out.printf("%s>eval %s%n", indent(INDENT++), obj);
         Object result = obj;
         if (obj instanceof Evalable)
             result = ((Evalable)obj).eval(env);
+        if (DEBUG)
         System.out.printf("%s<eval %s%n", indent(--INDENT), result);
         return result;
     }
     
     public static Object invoke(Object obj, Object self, Env env) {
+        if (DEBUG)
         System.out.printf("%s>invoke %s %s%n", indent(INDENT++), self, obj);
         if (self == null) {
             INDENT = 0;
@@ -34,7 +39,8 @@ public class Global {
         }
         if (obj instanceof Invokable) {
             Object r = ((Invokable)obj).invoke(self, env);
-            System.out.printf("%s<invoke %s%n", indent(--INDENT), r);
+            if (DEBUG)
+                System.out.printf("%s<invoke %s%n", indent(--INDENT), r);
             return r;
         }
         INDENT = 0;
@@ -66,6 +72,8 @@ public class Global {
         defineGlobal("car", (Procedure)(self, args) -> car(car(args)));
         defineGlobal("cdr", (Procedure)(self, args) -> cdr(car(args)));
         defineGlobal("cons", (Procedure)(self, args) -> Pair.of(car(args), cadr(args)));
+        defineGlobal("null?", (Procedure)(self, args) -> car(args) == Nil.VALUE);
+        defineGlobal("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
         defineGlobal("define", (Applicable)(self, args, env) -> {
             Object parms = car(args);
             if (parms instanceof Symbol)
@@ -84,7 +92,6 @@ public class Global {
                 actual.tail(cadr(e));
             }
             return Pair.of(Pair.of(Symbol.of("lambda"), Pair.of(parms.build(), cdr(args))), actual.build());
-            
         });
         defineGlobal("quote", (Applicable)(self, args, env) -> car(args));
         defineGlobal("+", new GenericOperator(Symbol.of("+")));
@@ -92,6 +99,7 @@ public class Global {
         defineGlobal("*", new GenericOperator(Symbol.of("*")));
         defineGlobal("<", new GenericOperator(Symbol.of("<")));
     
+        defineClass(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
         defineClass(Integer.class, "+", (Procedure)(self, args) -> ((int)self) + ((int)car(args)));
         defineClass(Integer.class, "-", (Procedure)(self, args) -> ((int)self) - ((int)car(args)));
         defineClass(Integer.class, "*", (Procedure)(self, args) -> ((int)self) * ((int)car(args)));

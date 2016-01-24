@@ -2,6 +2,7 @@ package com.github.saka1029.obscure.core;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 
 public class Reader {
 
@@ -163,6 +164,9 @@ public class Reader {
         if (Character.toUpperCase(ch) == 'L') {
             get();
             return Long.valueOf(sb.toString());
+        } else if (Character.toUpperCase(ch) == 'I') {
+            get();
+            return new BigInteger(sb.toString());
         } else if (ch == '.') {
             sb.append((char)ch);
             get();

@@ -21,13 +21,6 @@ public class TestPair {
 
     static Env env = Env.create();
     
-    @BeforeClass
-    public static void before() {
-        defineGlobal("null?", (Procedure)(self, args) -> car(args) == Nil.VALUE);
-        defineGlobal("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
-        defineClass(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
-    }
-
     @Test
     public void test() throws IOException {
         assertEquals(null, read("null"));

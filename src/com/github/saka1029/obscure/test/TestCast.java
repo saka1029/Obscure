@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,6 +27,7 @@ public class TestCast {
         defineGlobal("long", Long.class);
         defineGlobal("double", Double.class);
         defineGlobal("Object", Object.class);
+        defineGlobal("BigInteger", BigInteger.class);
         defineGlobal("cast", (Procedure)(self, args) -> {
             Class<?> cls = (Class<?>)car(args);
             Object obj = car(cdr(args));
@@ -41,6 +43,8 @@ public class TestCast {
                 return ((Number)obj).byteValue();
             else if (cls == Character.class)
                 return (char)((Number)obj).intValue();
+            else if (cls == BigInteger.class)
+                return BigInteger.valueOf(((Number)obj).longValue());
             else
                 return cls.cast(car(cdr(args)));
         });
@@ -101,5 +105,12 @@ public class TestCast {
     public void testIntMethod() throws IOException {
         assertEquals(123, eval(read("(123.456 (int))"), env));
         assertEquals(123, eval(read("(123.456D (int))"), env));
+    }
+    
+    @Test
+    public void testBigInteger() throws IOException {
+        assertEquals(new BigInteger("123456789012345678901234567890"), eval(read("123456789012345678901234567890I"), env));
+        assertEquals(BigInteger.valueOf(1234567890L), eval(read("(cast BigInteger 1234567890L)"), env));
+        assertEquals(123456789012345678901234567890D, eval(read("(cast double 123456789012345678901234567890I)"), env));
     }
 }
