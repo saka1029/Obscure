@@ -27,24 +27,18 @@ public class Pair extends List {
     public Object invoke(Object self, Env env) {
         if (!(car instanceof Symbol))
             throw new ObscureException("cannto eval %s", this);
-        Symbol name = (Symbol)car;
+        Symbol symbol = (Symbol)car;
         Applicable method;
-        Object value = null;
-        Class<?> cls = self.getClass();
-        if (cls.isArray())
-            cls = Object[].class;
-        Env classEnv = Global.CLASS_ENV.get(cls);
-        if (classEnv != null)
-            value = classEnv.get(name);
+        Object value = Global.getClassEnv(self.getClass(), symbol);
         if (value instanceof Applicable)
             method = (Applicable)value;
-        else if (name == Symbol.of("new"))
+        else if (symbol == Symbol.of("new"))
             method = (Procedure)(s, args) -> Reflection.constructor(s, args.toArray());
         else
-            method = (Procedure)(s, args) -> Reflection.method(s, name.name, args.toArray());
+            method = (Procedure)(s, args) -> Reflection.method(s, symbol.name, args.toArray());
         Object result = method.apply(self, (List)cdr, env);
         if (result == Reflection.NOT_FOUND)
-            throw new ObscureException("%s does not have method %s", self, name);
+            throw new ObscureException("%s does not have method %s", self, symbol);
         return result;
     }
     

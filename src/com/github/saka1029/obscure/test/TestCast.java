@@ -20,15 +20,15 @@ public class TestCast {
    
     @BeforeClass
     public static void before() throws IOException {
-        defineGlobal("byte", Byte.class);
-        defineGlobal("int", Integer.class);
-        defineGlobal("short", Short.class);
-        defineGlobal("char", Character.class);
-        defineGlobal("long", Long.class);
-        defineGlobal("double", Double.class);
-        defineGlobal("Object", Object.class);
-        defineGlobal("BigInteger", BigInteger.class);
-        defineGlobal("cast", (Procedure)(self, args) -> {
+        defineGlobalEnv("byte", Byte.class);
+        defineGlobalEnv("int", Integer.class);
+        defineGlobalEnv("short", Short.class);
+        defineGlobalEnv("char", Character.class);
+        defineGlobalEnv("long", Long.class);
+        defineGlobalEnv("double", Double.class);
+        defineGlobalEnv("Object", Object.class);
+        defineGlobalEnv("BigInteger", BigInteger.class);
+        defineGlobalEnv("cast", (Procedure)(self, args) -> {
             Class<?> cls = (Class<?>)car(args);
             Object obj = car(cdr(args));
             if (cls == Integer.class)
@@ -48,9 +48,9 @@ public class TestCast {
             else
                 return cls.cast(car(cdr(args)));
         });
-        defineGlobal("asInt", (Procedure)(self, args) -> ((Number)car(args)).intValue());
+        defineGlobalEnv("asInt", (Procedure)(self, args) -> ((Number)car(args)).intValue());
 
-        defineClass(Double.class, "int", (Procedure)(self, args) -> ((Number)self).intValue());
+        defineClassEnv(Double.class, "int", (Procedure)(self, args) -> ((Number)self).intValue());
     }
 
     @Test

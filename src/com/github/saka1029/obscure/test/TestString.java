@@ -18,7 +18,7 @@ public class TestString {
    
     @BeforeClass
     public static void before() throws IOException {
-        defineGlobal("String", String.class);
+        defineGlobalEnv("String", String.class);
     }
 
     @Test
@@ -32,6 +32,17 @@ public class TestString {
         assertEquals(true, eval(read("(\"a\" (< \"b\"))"), env));
         assertEquals(false, eval(read("(\"b\" (< \"a\"))"), env));
         assertEquals(-1, eval(read("(\"a\" (compareTo \"b\"))"), env));
+    }
+    
+    @Test
+    public void testPrint() throws IOException {
+        assertEquals("\"abc\"", eval(read("(\"abc\" (print))"), env));
+        assertEquals("\"a\\rc\"", eval(read("(\"a\\rc\" (print))"), env));
+    }
+    
+    @Test
+    public void testMacroPrint() throws IOException {
+        assertEquals("\"abc\"", eval(read("(print \"abc\")"), env));
     }
 
 }

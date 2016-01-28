@@ -4,14 +4,13 @@ import static org.junit.Assert.*;
 
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.function.Consumer;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.saka1029.obscure.core.Env;
-import com.github.saka1029.obscure.core.List;
 import com.github.saka1029.obscure.core.Procedure;
 
 import static com.github.saka1029.obscure.core.Global.*;
@@ -25,35 +24,24 @@ public class TestArray {
 
     static Env env = Env.create();
    
-    static int[] toIntArray(Object obj) {
-        List dims = (List)obj;
-        int size = dims.size();
-        int[] result = new int[size];
-        for (int i = 0; i < size; ++i, dims = (List)cdr(dims))
-            result[i] = (int)car(dims);
-        return result;
-    }
-
-    static Object first(Object f, Consumer<Object> consumer) {
-        consumer.accept(f);
-        return f;
-    }
-
     @BeforeClass
     public static void before() throws IOException {
-        defineGlobal("Array", Array.class);
-        defineGlobal("int", Integer.TYPE);
-        defineGlobal("Integer", Integer.class);
-        defineGlobal("array", (Procedure)(self, args) -> Array.newInstance((Class<?>)car(args), toIntArray(cdr(args))));
-        defineGlobal("set", (Procedure)(self, args) -> {
+        defineGlobalEnv("Array", Array.class);
+        defineGlobalEnv("set", (Procedure)(self, args) -> {
             Object value = caddr(args);
             Array.set(car(args), (int)cadr(args), value);
             return value;
         });
-        defineGlobal("get", (Procedure)(self, args) -> Array.get(car(args), (int)cadr(args)));
-        defineClass(Object[].class, "get", (Procedure)(self, args) -> Array.get(self, (int)car(args)));
-        defineClass(Object[].class, "set", (Procedure)(self, args) -> first(cadr(args), x -> Array.set(self, (int)car(args), x)));
-        defineClass(Object[].class, "length", (Procedure)(self, args) -> Array.getLength(self));
+        defineGlobalEnv("get", (Procedure)(self, args) -> Array.get(car(args), (int)cadr(args)));
+    }
+
+    @Test
+    public void testArraySuper() {
+        assertEquals(Object.class, int[].class.getSuperclass());
+        assertArrayEquals(new Class[]{ Cloneable.class, Serializable.class}, int[].class.getInterfaces());
+        assertArrayEquals(new Class[]{ Cloneable.class, Serializable.class}, Integer[].class.getInterfaces());
+        assertFalse(Object[].class.isAssignableFrom(int[].class));
+        assertTrue(Object[].class.isAssignableFrom(Integer[].class));
     }
 
     @Test

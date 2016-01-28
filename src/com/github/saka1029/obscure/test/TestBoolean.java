@@ -21,13 +21,13 @@ public class TestBoolean {
    
     @BeforeClass
     public static void before() throws IOException {
-        defineGlobal("Boolean", String.class);
-        defineGlobal("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
-        defineGlobal("and", new GenericOperator(Symbol.of("and")));
-        defineGlobal("or", new GenericOperator(Symbol.of("or")));
-        defineClass(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
-        defineClass(Boolean.class, "and", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : false);
-        defineClass(Boolean.class, "or", (Applicable)(self, args, env) -> (boolean)self ? true : eval(car(args), env));
+        defineGlobalEnv("Boolean", String.class);
+        defineGlobalEnv("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
+        defineGlobalEnv("and", new GenericOperator(Symbol.of("and")));
+        defineGlobalEnv("or", new GenericOperator(Symbol.of("or")));
+        defineClassEnv(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
+        defineClassEnv(Boolean.class, "and", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : false);
+        defineClassEnv(Boolean.class, "or", (Applicable)(self, args, env) -> (boolean)self ? true : eval(car(args), env));
     }
 
     @Test

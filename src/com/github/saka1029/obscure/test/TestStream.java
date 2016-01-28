@@ -20,10 +20,10 @@ public class TestStream {
     
     @BeforeClass
     public static void before() throws IOException {
-        defineGlobal("IntStream", IntStream.class);
-        defineGlobal("Array", Array.class);
-        defineGlobal("String", String.class);
-        defineGlobal("Stream", Stream.class);
+        defineGlobalEnv("IntStream", IntStream.class);
+        defineGlobalEnv("Array", Array.class);
+        defineGlobalEnv("String", String.class);
+        defineGlobalEnv("Stream", Stream.class);
     }
 
     @Test

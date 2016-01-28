@@ -19,10 +19,10 @@ public class TestBigInteger {
     
     @BeforeClass
     public static void before() throws IOException {
-        defineClass(BigInteger.class, "<", (Procedure)(self, args) -> ((BigInteger)self).compareTo((BigInteger)car(args)) < 0);
-        defineClass(BigInteger.class, "+", (Procedure)(self, args) -> ((BigInteger)self).add((BigInteger)car(args)));
-        defineClass(BigInteger.class, "-", (Procedure)(self, args) -> ((BigInteger)self).subtract((BigInteger)car(args)));
-        defineClass(BigInteger.class, "*", (Procedure)(self, args) -> ((BigInteger)self).multiply((BigInteger)car(args)));
+        defineClassEnv(BigInteger.class, "<", (Procedure)(self, args) -> ((BigInteger)self).compareTo((BigInteger)car(args)) < 0);
+        defineClassEnv(BigInteger.class, "+", (Procedure)(self, args) -> ((BigInteger)self).add((BigInteger)car(args)));
+        defineClassEnv(BigInteger.class, "-", (Procedure)(self, args) -> ((BigInteger)self).subtract((BigInteger)car(args)));
+        defineClassEnv(BigInteger.class, "*", (Procedure)(self, args) -> ((BigInteger)self).multiply((BigInteger)car(args)));
     }
 
     static final BigInteger FACT100 = new BigInteger(

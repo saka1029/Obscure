@@ -14,4 +14,6 @@ public interface Env {
         return new MapEnv(Global.ENV);
     }
     
+    public static final Env EMPTY = new MapEnv(null);
+    
 }

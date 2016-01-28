@@ -4,17 +4,11 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-
 import static com.github.saka1029.obscure.core.Global.*;
 
 import org.junit.Test;
 
-import com.github.saka1029.obscure.core.Applicable;
 import com.github.saka1029.obscure.core.Env;
-import com.github.saka1029.obscure.core.Nil;
-import com.github.saka1029.obscure.core.Procedure;
 import com.github.saka1029.obscure.core.Symbol;
 
 public class TestPair {

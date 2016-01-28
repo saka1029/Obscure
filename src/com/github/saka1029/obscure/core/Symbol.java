@@ -22,10 +22,7 @@ public class Symbol implements Evalable, Invokable {
     
     @Override
     public Object invoke(Object self, Env env) {
-        Object value = null;
-        Env classEnv = Global.CLASS_ENV.get(self.getClass());
-        if (classEnv != null)
-            value = classEnv.get(this);
+        Object value = Global.getClassEnv(self.getClass(), this);
         if (value == null)
             value = Reflection.field(self, name);
         if (value == Reflection.NOT_FOUND)

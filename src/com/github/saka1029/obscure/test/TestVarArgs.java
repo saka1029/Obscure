@@ -16,15 +16,16 @@ public class TestVarArgs {
 
     static Env env = Env.create();
    
-    @BeforeClass
-    public static void before() throws IOException {
-        defineGlobal("String", String.class);
-    }
-
     @Test
-    public void testStringFormat() throws IOException {
-        assertEquals("a0123", eval(read("(String (format \"a%04d\" 123))"), env));
+    public void testImportString() throws IOException {
+        assertEquals(String.class, eval(read("(import \"java.lang.String\")"), env));
         assertEquals("a0123 xyz", eval(read("(String (format \"a%04d%4s\" 123 \"xyz\"))"), env));
+    }
+   
+    @Test
+    public void testImportAlias() throws IOException {
+        assertEquals(String.class, eval(read("(import Str \"java.lang.String\")"), env));
+        assertEquals("a0123 xyz", eval(read("(Str (format \"a%04d%4s\" 123 \"xyz\"))"), env));
     }
 
 }
