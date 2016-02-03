@@ -2,8 +2,9 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,15 +20,16 @@ public class TestStream {
     static Env env = Env.create();
     
     @BeforeClass
-    public static void before() throws IOException {
+    public static void before() {
         defineGlobalEnv("IntStream", IntStream.class);
         defineGlobalEnv("Array", Array.class);
         defineGlobalEnv("String", String.class);
         defineGlobalEnv("Stream", Stream.class);
+        defineGlobalEnv("Collectors", Collectors.class);
     }
 
     @Test
-    public void test() throws IOException {
+    public void test() {
         assertArrayEquals(new int[]{1, 2, 3}, (int[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"
@@ -40,7 +42,7 @@ public class TestStream {
     }
 
     @Test
-    public void testFilter() throws IOException {
+    public void testFilter() {
         assertArrayEquals(new int[]{1, 2}, (int[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"
@@ -49,7 +51,7 @@ public class TestStream {
     }
 
     @Test
-    public void testMapToObj() throws IOException {
+    public void testMapToObj() {
         assertArrayEquals(new Object[]{"a1", "a2", "a3"}, (Object[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"
@@ -58,7 +60,16 @@ public class TestStream {
     }
 
     @Test
-    public void testMapToObjString() throws IOException {
+    public void testMapToObjToList() {
+        assertEquals(Arrays.asList("a1", "a2", "a3"), (java.util.List<?>)eval(read(
+            "(IntStream"
+            + " (of 1 2 3)"
+            + " (mapToObj (lambda (x) (+ \"a\" x)))"
+            + " (collect (Collectors (toList))))"), env));
+    }
+
+    @Test
+    public void testMapToObjString() {
         assertArrayEquals(new String[]{"a1", "a2", "a3"}, (String[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"
@@ -72,7 +83,7 @@ public class TestStream {
      */
     @Test
     @Ignore
-    public void testFilterNigate() throws IOException {
+    public void testFilterNigate() {
         assertArrayEquals(new int[]{1, 2}, (int[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"

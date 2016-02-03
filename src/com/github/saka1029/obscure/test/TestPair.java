@@ -2,8 +2,6 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import static com.github.saka1029.obscure.core.Global.*;
 
 import org.junit.Test;
@@ -16,14 +14,14 @@ public class TestPair {
     static Env env = Env.create();
     
     @Test
-    public void test() throws IOException {
+    public void test() {
         assertEquals(null, read("null"));
         assertEquals(Symbol.of("null?"), read("null?"));
         assertEquals(true, eval(read("(null? '())"), env));
     }
     
     @Test
-    public void testAppendApplicable() throws IOException {
+    public void testAppendApplicable() {
         eval(read(
             "(define (append a b)"
             + "  (if (null? a)"
@@ -34,7 +32,7 @@ public class TestPair {
     }
     
     @Test
-    public void testAppendMethod() throws IOException {
+    public void testAppendMethod() {
         eval(read(
             "(define (append a b)"
             + "  ((null? a) (if"
@@ -45,7 +43,7 @@ public class TestPair {
     }
     
     @Test
-    public void testFact() throws IOException {
+    public void testFact() {
         eval(read(
             "(define (fact n)"
             + "  (if (< n 1)"
@@ -54,14 +52,14 @@ public class TestPair {
         assertEquals(6, eval(read("(fact 3)"), env));
     }
     
-    @Test
-    public void testFactMethod() throws IOException {
-        eval(read(
-            "(define (fact n)"
-            + "  ((n (< 1)) (if"
-            + "      1"
-            + "      ((fact (n (- 1))) (* n)))))"), env);
-        assertEquals(6, eval(read("(fact 3)"), env));
-    }
+//    @Test
+//    public void testFactMethod() {
+//        eval(read(
+//            "(define (fact n)"
+//            + "  ((n (< 1)) (if"
+//            + "      1"
+//            + "      ((fact (n (- 1))) (* n)))))"), env);
+//        assertEquals(6, eval(read("(fact 3)"), env));
+//    }
 
 }

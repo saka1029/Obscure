@@ -2,7 +2,6 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.BeforeClass;
@@ -18,8 +17,8 @@ public class TestBigInteger {
     static Env env = Env.create();
     
     @BeforeClass
-    public static void before() throws IOException {
-        defineClassEnv(BigInteger.class, "<", (Procedure)(self, args) -> ((BigInteger)self).compareTo((BigInteger)car(args)) < 0);
+    public static void before() {
+//        defineClassEnv(BigInteger.class, "<", (Procedure)(self, args) -> ((BigInteger)self).compareTo((BigInteger)car(args)) < 0);
         defineClassEnv(BigInteger.class, "+", (Procedure)(self, args) -> ((BigInteger)self).add((BigInteger)car(args)));
         defineClassEnv(BigInteger.class, "-", (Procedure)(self, args) -> ((BigInteger)self).subtract((BigInteger)car(args)));
         defineClassEnv(BigInteger.class, "*", (Procedure)(self, args) -> ((BigInteger)self).multiply((BigInteger)car(args)));
@@ -32,7 +31,7 @@ public class TestBigInteger {
         + "64000000000000000000000000");
 
     @Test
-    public void testFact() throws IOException {
+    public void testFact() {
         eval(read(
             "(define (fact n)"
             + "  (if (< n 1I)"

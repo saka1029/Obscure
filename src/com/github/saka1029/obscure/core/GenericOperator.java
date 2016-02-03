@@ -15,7 +15,7 @@ public class GenericOperator implements Macro {
         Pair.Builder r = Pair.builder();
         r.tail(car(args));
         for (Object e = cdr(args); e instanceof Pair; e = cdr(e))
-            r.tail(Pair.list(op, car(e)));
+            r.tail(list(op, car(e)));
         return r.build();
     }
 

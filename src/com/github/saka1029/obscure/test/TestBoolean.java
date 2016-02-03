@@ -2,9 +2,6 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-
-import java.io.IOException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,7 +17,7 @@ public class TestBoolean {
     static Env env = Env.create();
    
     @BeforeClass
-    public static void before() throws IOException {
+    public static void before() {
         defineGlobalEnv("Boolean", String.class);
         defineGlobalEnv("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
         defineGlobalEnv("and", new GenericOperator(Symbol.of("and")));
@@ -31,19 +28,19 @@ public class TestBoolean {
     }
 
     @Test
-    public void testProcedure() throws IOException {
+    public void testProcedure() {
         assertEquals(1, eval(read("(if true 1 2)"), env));
         assertEquals(2, eval(read("(if false 1 2)"), env));
     }
 
     @Test
-    public void testMethod() throws IOException {
+    public void testMethod() {
         assertEquals(4, eval(read("(true (if 1 2) (+ 3))"), env));
         assertEquals(5, eval(read("(false (if 1 2) (+ 3))"), env));
     }
     
     @Test
-    public void testMethodAnd() throws IOException {
+    public void testMethodAnd() {
         assertEquals(true, eval(read("(true (and true))"), env));
         assertEquals(false, eval(read("(true (and false))"), env));
         assertEquals(false, eval(read("(false (and true))"), env));
@@ -51,7 +48,7 @@ public class TestBoolean {
     }
     
     @Test
-    public void testMethodOr() throws IOException {
+    public void testMethodOr() {
         assertEquals(true, eval(read("(true (or true))"), env));
         assertEquals(true, eval(read("(true (or false))"), env));
         assertEquals(true, eval(read("(false (or true))"), env));
@@ -59,7 +56,7 @@ public class TestBoolean {
     }
 
     @Test
-    public void testMacroAnd() throws IOException {
+    public void testMacroAnd() {
         assertEquals(true, eval(read("(and true true)"), env));
         assertEquals(false, eval(read("(and true false)"), env));
         assertEquals(false, eval(read("(and false true)"), env));

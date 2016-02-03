@@ -45,12 +45,16 @@ public class Reader {
 
     final java.io.Reader reader;
     
-    public Reader(java.io.Reader reader) throws IOException {
-        this.reader = reader;
-        get();
+    public Reader(java.io.Reader reader) {
+        try {
+            this.reader = reader;
+            get();
+        } catch (IOException e) {
+            throw new ObscureException(e);
+        }
     }
     
-    public Reader(String s) throws IOException {
+    public Reader(String s) {
         this(new StringReader(s));
     }
     
@@ -164,6 +168,9 @@ public class Reader {
         if (Character.toUpperCase(ch) == 'L') {
             get();
             return Long.valueOf(sb.toString());
+        } else if (Character.toUpperCase(ch) == 'D') {
+            get();
+            return Double.valueOf(sb.toString());
         } else if (Character.toUpperCase(ch) == 'I') {
             get();
             return new BigInteger(sb.toString());
@@ -198,23 +205,27 @@ public class Reader {
             return Integer.valueOf(sb.toString());
     }
 
-    public Object read() throws IOException {
-        skipSpace();
-        switch (ch) {
-            case '(': return readList();
-            case '\'': return readQuote();
-            case '"': return readString();
-            case '?': return readChar();
-            case EOF: return EOF_OBJECT;
-            default:
-                if (isFirstSymbol(ch))
-                    return readSymbol();
-                else if (isDigit(ch))
-                    return readNumber();
-                else {
-                    get();
-                    throw new ObscureException("unknown charcter '%s'", (char)ch);
-                }
+    public Object read() {
+        try {
+            skipSpace();
+            switch (ch) {
+                case '(': return readList();
+                case '\'': return readQuote();
+                case '"': return readString();
+                case '?': return readChar();
+                case EOF: return EOF_OBJECT;
+                default:
+                    if (isFirstSymbol(ch))
+                        return readSymbol();
+                    else if (isDigit(ch))
+                        return readNumber();
+                    else {
+                        get();
+                        throw new ObscureException("unknown charcter '%s'", (char)ch);
+                    }
+            }
+        } catch (IOException e) {
+            throw new ObscureException(e);
         }
         
     }

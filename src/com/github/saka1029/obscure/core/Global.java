@@ -1,7 +1,10 @@
 package com.github.saka1029.obscure.core;
 
-import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +12,7 @@ public class Global {
 
     public static boolean DEBUG = false;
     
-    public static Object read(String s) throws IOException {
+    public static Object read(String s) {
         return new Reader(s).read();
     }
 
@@ -27,13 +30,13 @@ public class Global {
         if (obj instanceof Evalable)
             result = ((Evalable)obj).eval(env);
         if (DEBUG)
-        System.out.printf("%s<eval %s%n", indent(--INDENT), print(result));
+            System.out.printf("%s<eval %s%n", indent(--INDENT), print(result));
         return result;
     }
     
     public static Object invoke(Object obj, Object self, Env env) {
         if (DEBUG)
-        System.out.printf("%s>invoke %s %s%n", indent(INDENT++), print(self), print(obj));
+            System.out.printf("%s>invoke %s %s%n", indent(INDENT++), print(self), print(obj));
         if (self == null) {
             INDENT = 0;
             throw new ObscureException("cannot invoke %s for %s", print(obj), print(self));
@@ -51,7 +54,7 @@ public class Global {
     public static String print(Object obj) {
         if (obj == null)
             return "null";
-        Object value = getClassEnv(obj.getClass(), Symbol.of("print"));
+        Object value = getClassEnv(obj.getClass(), sym("print"));
         if (value instanceof Applicable)
             return (String)((Applicable)value).apply(obj, Nil.VALUE, Env.EMPTY);
         return obj.toString();
@@ -60,13 +63,13 @@ public class Global {
     public static final Env ENV = new MapEnv(null);
 
     public static void defineGlobalEnv(String key, Object value) {
-        ENV.define(Symbol.of(key), value);
+        ENV.define(sym(key), value);
     }
 
     public static final Map<Symbol, Map<Class<?>, Object>> CLASS_ENV = new HashMap<>();
     
     public static void defineClassEnv(Class<?> cls, String key, Object value) {
-        CLASS_ENV.computeIfAbsent(Symbol.of(key), k -> new HashMap<>()).put(cls, value);
+        CLASS_ENV.computeIfAbsent(sym(key), k -> new HashMap<>()).put(cls, value);
     }
     
     public static Object getClassEnv(Class<?> cls, Symbol symbol) {
@@ -89,6 +92,31 @@ public class Global {
         return null;
     }
     
+    public static void defineClassEnv(Class<?> extender) {
+        for (Method m : extender.getMethods()) {
+            if ((m.getModifiers() & Modifier.STATIC) == 0) continue;
+            if (m.getParameters().length < 1) continue;
+            Parameter[] p = m.getParameters();
+            if (p.length < 1) continue;
+            Class<?> clas = p[0].getType();
+            if (clas.isPrimitive())
+                clas = Reflection.getPrimitive(clas);
+            String name = m.getName();
+            Annotation a = m.getAnnotation(MethodName.class);
+            if (a != null) {
+                String value = ((MethodName)a).value();
+                if (value != null && value.length() > 0)
+                    name = value;
+            }
+            Map<Class<?>, Object> map = CLASS_ENV.computeIfAbsent(sym(name), k -> new HashMap<>());
+            Object value = map.computeIfAbsent(clas, k -> new MethodProcedure());
+            if (!(value instanceof MethodProcedure))
+                throw new ObscureException("class %s name %s is not procedure", clas, name);
+//            System.out.println(clas + ":" + m);
+            ((MethodProcedure)value).add(m);
+        }
+    }
+
     static {
         defineGlobalEnv("exit", Reader.EOF_OBJECT);
         defineGlobalEnv("Class", Class.class);
@@ -96,7 +124,7 @@ public class Global {
         defineGlobalEnv("int", Integer.TYPE);
         defineGlobalEnv("car", (Procedure)(self, args) -> car(car(args)));
         defineGlobalEnv("cdr", (Procedure)(self, args) -> cdr(car(args)));
-        defineGlobalEnv("cons", (Procedure)(self, args) -> Pair.of(car(args), cadr(args)));
+        defineGlobalEnv("cons", (Procedure)(self, args) -> cons(car(args), cadr(args)));
         defineGlobalEnv("null?", (Procedure)(self, args) -> car(args) == Nil.VALUE);
         defineGlobalEnv("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
         defineGlobalEnv("define", (Applicable)(self, args, env) -> {
@@ -115,7 +143,7 @@ public class Global {
                     return env.define((Symbol)car(args), Class.forName(name));
                 } else {
                     String name = (String)eval(car(args), env);
-                    return env.define(Symbol.of(name.replaceFirst("^.*\\.", "")), Class.forName(name));
+                    return env.define(sym(name.replaceFirst("^.*\\.", "")), Class.forName(name));
                 }
             } catch (ClassNotFoundException e) {
                 throw new ObscureException(e);
@@ -129,16 +157,23 @@ public class Global {
                 parms.tail(car(e));
                 actual.tail(cadr(e));
             }
-            return Pair.of(Pair.of(Symbol.of("lambda"), Pair.of(parms.build(), cdr(args))), actual.build());
+            return cons(cons(sym("lambda"), cons(parms.build(), cdr(args))), actual.build());
         });
         defineGlobalEnv("quote", (Applicable)(self, args, env) -> car(args));
-        defineGlobalEnv("+", new GenericOperator(Symbol.of("+")));
-        defineGlobalEnv("-", new GenericOperator(Symbol.of("-")));
-        defineGlobalEnv("*", new GenericOperator(Symbol.of("*")));
-        defineGlobalEnv("<", new GenericOperator(Symbol.of("<")));
-        defineGlobalEnv("print", (Macro)(args) -> list(car(args), list(Symbol.of("print"))));
+        defineGlobalEnv("+", new GenericOperator(sym("+")));
+        defineGlobalEnv("-", new GenericOperator(sym("-")));
+        defineGlobalEnv("*", new GenericOperator(sym("*")));
+        defineGlobalEnv("<", new CompareOperator(sym("<0")));
+        defineGlobalEnv("<=", new CompareOperator(sym("<=0")));
+        defineGlobalEnv(">", new CompareOperator(sym(">0")));
+        defineGlobalEnv(">=", new CompareOperator(sym(">=0")));
+        defineGlobalEnv("<>", new CompareOperator(sym("<>0")));
+        defineGlobalEnv("==", new CompareOperator(sym("==0")));
+        defineGlobalEnv("print", (Macro)(args) -> list(car(args), list(sym("print"))));
         defineGlobalEnv("array", (Procedure)(self, args) -> Reflection.method(Array.class, "newInstance", args.toArray()));
     
+        defineClassEnv(StandardExtender.class);
+        defineClassEnv(Integer.class);
         defineClassEnv(Object[].class, "get", (Procedure)(self, args) -> Array.get(self, (int)car(args)));
         defineClassEnv(Object[].class, "set", (Procedure)(self, args) -> {
             Object value = cadr(args);
@@ -147,31 +182,6 @@ public class Global {
         });
         defineClassEnv(Object[].class, "length", (Procedure)(self, args) -> Array.getLength(self));
         defineClassEnv(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
-        defineClassEnv(Integer.class, "+", (Procedure)(self, args) -> ((int)self) + ((int)car(args)));
-        defineClassEnv(Integer.class, "-", (Procedure)(self, args) -> ((int)self) - ((int)car(args)));
-        defineClassEnv(Integer.class, "*", (Procedure)(self, args) -> ((int)self) * ((int)car(args)));
-        defineClassEnv(Integer.class, "<", (Procedure)(self, args) -> ((int)self) < ((int)car(args)));
-        defineClassEnv(String.class, "+", (Procedure)(self, args) -> ((String)self) + car(args));
-        defineClassEnv(String.class, "<", (Procedure)(self, args) -> ((String)self).compareTo((String)car(args)) < 0);
-        defineClassEnv(String.class, "print", (Procedure)(self, args) -> {
-            String s = (String)self;
-            StringBuilder sb = new StringBuilder();
-            sb.append("\"");
-            for (int i = 0, size = s.length(); i < size; ++i) {
-                char c = s.charAt(i);
-                switch (c) {
-                    case '\b': sb.append("\\b"); break;
-                    case '\f': sb.append("\\f"); break;
-                    case '\t': sb.append("\\t"); break;
-                    case '\n': sb.append("\\n"); break;
-                    case '\r': sb.append("\\r"); break;
-                    case '"': sb.append("\\\""); break;
-                    default: sb.append(c); break;
-                }
-            }
-            sb.append("\"");
-            return sb.toString();
-        });
     }
     
     public static Object car(Object obj) {
@@ -194,11 +204,19 @@ public class Global {
         return car(cdr(cdr(obj)));
     }
     
+    public static Object cons(Object car, Object cdr) {
+        return Pair.of(car, cdr);
+    }
+    
     public static List asList(Object obj) {
         return (List)obj;
     }
 
     public static List list(Object... args) {
         return Pair.list(args);
+    }
+    
+    public static Symbol sym(String name) {
+        return Symbol.of(name);
     }
 }

@@ -38,18 +38,27 @@ public class Reflection {
         return result;
     }
 
-    private static Map<Class<?>, Class<?>> PRIMITIVES = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> PRIMITIVES = new HashMap<>();
+
+    public static Class<?> getPrimitive(Class<?> cls) {
+        return PRIMITIVES.get(cls);
+    }
     
+    private static void put(Class<?> primitive, Class<?> wrapper) {
+        PRIMITIVES.put(primitive, wrapper);
+        PRIMITIVES.put(wrapper, primitive);
+    }
+
     static {
-        PRIMITIVES.put(Boolean.TYPE, Boolean.class);
-        PRIMITIVES.put(Byte.TYPE, Byte.class);
-        PRIMITIVES.put(Character.TYPE, Character.class);
-        PRIMITIVES.put(Short.TYPE, Short.class);
-        PRIMITIVES.put(Integer.TYPE, Integer.class);
-        PRIMITIVES.put(Long.TYPE, Long.class);
-        PRIMITIVES.put(Float.TYPE, Float.class);
-        PRIMITIVES.put(Double.TYPE, Double.class);
-        PRIMITIVES.put(Void.TYPE, Void.class);
+        put(Boolean.TYPE, Boolean.class);
+        put(Byte.TYPE, Byte.class);
+        put(Character.TYPE, Character.class);
+        put(Short.TYPE, Short.class);
+        put(Integer.TYPE, Integer.class);
+        put(Long.TYPE, Long.class);
+        put(Float.TYPE, Float.class);
+        put(Double.TYPE, Double.class);
+        put(Void.TYPE, Void.class);
     }
 
     private static boolean isAssignable(Class<?> parmType, Object arg) {
@@ -111,7 +120,7 @@ public class Reflection {
         return actual;
     }
 
-    private static Object[] actualArguments(Executable e, Object... args) {
+    public static Object[] actualArguments(Executable e, Object... args) {
         if (e.isVarArgs())
             return actualArgumentsVarArgs(e, args);
         else
@@ -136,7 +145,7 @@ public class Reflection {
         return NOT_FOUND;
     }
 
-    private static Object method(Object self, String name, Class<?> clas, Object... args) {
+    public static Object method(Class<?> clas, Object self, String name, Object... args) {
         for (Method m : clas.getMethods()) {
             if (!m.getName().equals(name))
                 continue;
@@ -157,9 +166,9 @@ public class Reflection {
     }
 
     public static Object method(Object self, String name, Object... args) {
-        Object result = method(self, name, self.getClass(), args);
+        Object result = method(self.getClass(), self, name, args);
         if (result == NOT_FOUND && self instanceof Class)
-            result = method(self, name, (Class<?>)self, args);
+            result = method((Class<?>)self, self, name, args);
         return result;
     }
 

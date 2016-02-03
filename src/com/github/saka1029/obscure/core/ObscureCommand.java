@@ -19,7 +19,7 @@ public class ObscureCommand implements CommandProcessor {
                     Object x = eval(o, env);
                     if (x == Reader.EOF_OBJECT)
                         break;
-                    writer.write(x + "\n");
+                    writer.write(print(x) + "\n");
                     writer.flush();
                 } catch (Exception e) {
                     error.write(e.getMessage() + "\n");

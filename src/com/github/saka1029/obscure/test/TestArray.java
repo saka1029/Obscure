@@ -3,7 +3,6 @@ package com.github.saka1029.obscure.test;
 import static org.junit.Assert.*;
 
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 
@@ -25,7 +24,7 @@ public class TestArray {
     static Env env = Env.create();
    
     @BeforeClass
-    public static void before() throws IOException {
+    public static void before() {
         defineGlobalEnv("Array", Array.class);
         defineGlobalEnv("set", (Procedure)(self, args) -> {
             Object value = caddr(args);
@@ -45,7 +44,7 @@ public class TestArray {
     }
 
     @Test
-    public void testIntArray() throws IOException {
+    public void testIntArray() {
         assertArrayEquals(new int[] {0, 0}, (int[])eval(read("(define a (Array (newInstance int 2)))"), env));
         eval(read("(Array (set a 0 100))"), env);
         eval(read("(Array (set a 1 200))"), env);
@@ -53,7 +52,7 @@ public class TestArray {
     }
 
     @Test
-    public void testIntArrayProcedure() throws IOException {
+    public void testIntArrayProcedure() {
         assertArrayEquals(new int[] {0, 0}, (int[])eval(read("(define a (array int 2))"), env));
         assertEquals(100, eval(read("(set a 0 100)"), env));
         assertEquals(200, eval(read("(set a 1 200)"), env));
@@ -63,7 +62,7 @@ public class TestArray {
     }
 
     @Test
-    public void testIntegerArrayProcedure() throws IOException {
+    public void testIntegerArrayProcedure() {
         assertArrayEquals(new Integer[] {null, null}, (Integer[])eval(read("(define a (array Integer 2))"), env));
         assertEquals(100, eval(read("(set a 0 100)"), env));
         assertEquals(200, eval(read("(set a 1 200)"), env));
@@ -73,7 +72,7 @@ public class TestArray {
     }
 
     @Test
-    public void testIntArray2d() throws IOException {
+    public void testIntArray2d() {
         assertArrayEquals(new int[][] {{0, 0},{0, 0}}, (int[][])eval(read("(define a (array int 2 2))"), env));
         assertEquals(100, eval(read("(set (get a 0) 0 100)"), env));
         assertEquals(200, eval(read("(set (get a 0) 1 200)"), env));
@@ -83,7 +82,7 @@ public class TestArray {
     }
     
     @Test
-    public void testMethod() throws IOException {
+    public void testMethod() {
         assertArrayEquals(new int[] {0, 0}, (int[])eval(read("(define a (array int 2))"), env));
         assertEquals(100, eval(read("(a (set 0 100))"), env));
         assertEquals(200, eval(read("(a (set 1 200))"), env));
@@ -93,7 +92,7 @@ public class TestArray {
     }
     
     @Test
-    public void testMethod2d() throws IOException {
+    public void testMethod2d() {
         assertArrayEquals(new int[][] {{0, 0}, {0, 0}}, (int[][])eval(read("(define a (array int 2 2))"), env));
         assertEquals(2, eval(read("(a (length))"), env));
         assertEquals(2, eval(read("(a (get 0) (length))"), env));

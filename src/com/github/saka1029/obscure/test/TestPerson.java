@@ -2,8 +2,6 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import com.github.saka1029.obscure.core.Env;
@@ -43,7 +41,7 @@ public class TestPerson {
     }
 
     @Test
-    public void test() throws IOException {
+    public void test() {
         eval(read("(define Person (Class (forName \"" + Person.class.getName() + "\")))"), env);
         eval(read("(define jhon (Person (new \"Jhon\")))"), env);
         assertEquals("Jhon", eval(read("(jhon name)"), env));

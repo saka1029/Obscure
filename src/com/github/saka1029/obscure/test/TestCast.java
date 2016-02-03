@@ -2,8 +2,6 @@ package com.github.saka1029.obscure.test;
 
 import static org.junit.Assert.*;
 
-
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.BeforeClass;
@@ -19,7 +17,7 @@ public class TestCast {
     static Env env = Env.create();
    
     @BeforeClass
-    public static void before() throws IOException {
+    public static void before() {
         defineGlobalEnv("byte", Byte.class);
         defineGlobalEnv("int", Integer.class);
         defineGlobalEnv("short", Short.class);
@@ -54,45 +52,45 @@ public class TestCast {
     }
 
     @Test
-    public void testNumber() throws IOException {
+    public void testNumber() {
         assertEquals(123L, eval(read("(cast long 123)"), env));
         assertEquals(123D, eval(read("(cast double 123)"), env));
     }
 
     @Test
-    public void testChar() throws IOException {
+    public void testChar() {
         assertEquals('a', eval(read("(cast char 97)"), env));
     }
 
     @Test
-    public void testCharBig() throws IOException {
+    public void testCharBig() {
         assertEquals('ÿ', eval(read("(cast char 255)"), env));
         assertEquals((char)255, eval(read("(cast char 255)"), env));
     }
 
     @Test
-    public void testByte() throws IOException {
+    public void testByte() {
         assertEquals((byte)97, eval(read("(cast byte 97)"), env));
     }
 
     @Test
-    public void testByteBig() throws IOException {
+    public void testByteBig() {
         assertEquals((byte)255, eval(read("(cast byte 255)"), env));
     }
     
     @Test
-    public void testObject() throws IOException {
+    public void testObject() {
         assertEquals((Object)"123", eval(read("\"123\""), env));
         assertEquals((Object)"123", eval(read("(cast Object \"123\")"), env));
     }
     
     @Test(expected = ClassCastException.class)
-    public void testNumberError() throws IOException {
+    public void testNumberError() {
         assertEquals(123D, eval(read("(cast double \"123\")"), env));
     }
 
     @Test
-    public void testAsIntApplicable() throws IOException {
+    public void testAsIntApplicable() {
         assertEquals(123L, eval(read("123L"), env));
         assertEquals(123, eval(read("(asInt 123L)"), env));
         assertEquals(123.456F, eval(read("123.456F"), env));
@@ -102,13 +100,13 @@ public class TestCast {
     }
 
     @Test
-    public void testIntMethod() throws IOException {
+    public void testIntMethod() {
         assertEquals(123, eval(read("(123.456 (int))"), env));
         assertEquals(123, eval(read("(123.456D (int))"), env));
     }
     
     @Test
-    public void testBigInteger() throws IOException {
+    public void testBigInteger() {
         assertEquals(new BigInteger("123456789012345678901234567890"), eval(read("123456789012345678901234567890I"), env));
         assertEquals(BigInteger.valueOf(1234567890L), eval(read("(cast BigInteger 1234567890L)"), env));
         assertEquals(123456789012345678901234567890D, eval(read("(cast double 123456789012345678901234567890I)"), env));
