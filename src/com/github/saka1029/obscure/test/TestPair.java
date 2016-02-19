@@ -31,16 +31,16 @@ public class TestPair {
         assertEquals(list(1, 2, 3, 4), eval(read("(append '(1 2) '(3 4))"), env));
     }
     
-    @Test
-    public void testAppendMethod() {
-        eval(read(
-            "(define (append a b)"
-            + "  ((null? a) (if"
-            + "      b"
-            + "      (cons (car a)"
-            + "            (append (cdr a) b)))))"), env);
-        assertEquals(list(1, 2, 3, 4), eval(read("(append '(1 2) '(3 4))"), env));
-    }
+//    @Test
+//    public void testAppendMethod() {
+//        eval(read(
+//            "(define (append a b)"
+//            + "  ((null? a) (if"
+//            + "      b"
+//            + "      (cons (car a)"
+//            + "            (append (cdr a) b)))))"), env);
+//        assertEquals(list(1, 2, 3, 4), eval(read("(append '(1 2) '(3 4))"), env));
+//    }
     
     @Test
     public void testFact() {

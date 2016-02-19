@@ -1,17 +1,16 @@
 package com.github.saka1029.obscure.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Set;
-import static com.github.saka1029.obscure.core.Global.*;
 
-public class MethodProcedure implements Procedure {
+public class ConstructorProcedure implements Procedure {
 
-    private final java.util.Set<Method> methods;
+    private final java.util.Set<Constructor<?>> constructors;
         
-    public MethodProcedure(Set<Method> methods) {
-        this.methods = methods;
+    public ConstructorProcedure(Set<Constructor<?>> constructors) {
+        this.constructors = constructors;
     }
 
     @Override
@@ -21,21 +20,20 @@ public class MethodProcedure implements Procedure {
         int i = 0;
         for (Object e : args)
             allArgs[i++] = e;
-        for (Method e : methods) {
+        for (Constructor<?> e : constructors) {
             Object[] actual = Reflection.actualArguments(e, allArgs);
             if (actual != null) {
                 try {
                     e.setAccessible(true);
-                    return e.invoke(self, actual);
+                    return e.newInstance(actual);
                 } catch (IllegalAccessException
                         | IllegalArgumentException
+                        | InstantiationException
                         | InvocationTargetException ex) {
                     throw new ObscureException(ex);
                 }
             }
         }
-        throw new ObscureException("no method '%s' for arguments %s",
-            methods.iterator().next().getName(),
-            print(allArgs));
+        throw new ObscureException("no match constructor for %s", Arrays.toString(allArgs));
     }
 }

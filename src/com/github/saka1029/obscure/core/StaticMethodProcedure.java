@@ -3,22 +3,22 @@ package com.github.saka1029.obscure.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Set;
-import static com.github.saka1029.obscure.core.Global.*;
+import java.util.HashSet;
 
-public class MethodProcedure implements Procedure {
+public class StaticMethodProcedure implements Procedure {
 
-    private final java.util.Set<Method> methods;
+    private final java.util.Set<Method> methods = new HashSet<>();
         
-    public MethodProcedure(Set<Method> methods) {
-        this.methods = methods;
+    void add(Method method) {
+        methods.add(method);
     }
 
     @Override
     public Object apply(Object self, List args) {
         int length = args.size();
-        Object[] allArgs = new Object[length];
-        int i = 0;
+        Object[] allArgs = new Object[length + 1];
+        allArgs[0] = self;
+        int i = 1;
         for (Object e : args)
             allArgs[i++] = e;
         for (Method e : methods) {
@@ -26,7 +26,7 @@ public class MethodProcedure implements Procedure {
             if (actual != null) {
                 try {
                     e.setAccessible(true);
-                    return e.invoke(self, actual);
+                    return e.invoke(null, actual);
                 } catch (IllegalAccessException
                         | IllegalArgumentException
                         | InvocationTargetException ex) {
@@ -34,8 +34,6 @@ public class MethodProcedure implements Procedure {
                 }
             }
         }
-        throw new ObscureException("no method '%s' for arguments %s",
-            methods.iterator().next().getName(),
-            print(allArgs));
+        throw new ObscureException("no match method for %s", Arrays.toString(allArgs));
     }
 }

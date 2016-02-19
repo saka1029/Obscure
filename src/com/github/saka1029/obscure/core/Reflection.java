@@ -6,9 +6,12 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Reflection {
 
@@ -61,7 +64,7 @@ public class Reflection {
         put(Void.TYPE, Void.class);
     }
 
-    private static boolean isAssignable(Class<?> parmType, Object arg) {
+    public static boolean isAssignable(Class<?> parmType, Object arg) {
         if (parmType.isPrimitive()) {
             if (arg == null || !PRIMITIVES.get(parmType).isInstance(arg))
                 return false;
@@ -79,11 +82,12 @@ public class Reflection {
         for (int i = 0; i < parmSize; ++i) {
             Parameter parm = parms[i];
             Class<?> type = parm.getType();
-            // TODO: VarArgsとして配列が指定された場合はそのまま渡す。
             if (parm.isVarArgs()) {
                 int varSize = args.length - i;
-                if (varSize == 0 && type.isInstance(args[i]))
-                    actual[i] = args[i];
+                if (varSize == 0 && i >= args.length)
+                    actual[i] = null;   // ex. String.format("abc")
+                else if (varSize == 1 && type.isInstance(args[i]))
+                    actual[i] = args[i];    // ex. String.format("%s%s", new String[]{"a", "b"})
                 else {
                     Class<?> ctype = type.getComponentType();
                     Object vars = Array.newInstance(ctype, varSize);
@@ -107,10 +111,10 @@ public class Reflection {
     
     private static Object[] actualArgumentsNoVarArgs(Executable e, Object... args) {
         int argsSize = args.length;
-        Object[] actual = new Object[argsSize];
         int parmSize = e.getParameterCount();
         if (parmSize != args.length)
             return null;
+        Object[] actual = new Object[argsSize];
         Class<?>[] parmType = e.getParameterTypes();
         for (int i = 0; i < parmSize; ++i)
             if (!isAssignable(parmType[i], args[i]))
@@ -170,6 +174,25 @@ public class Reflection {
         if (result == NOT_FOUND && self instanceof Class)
             result = method((Class<?>)self, self, name, args);
         return result;
+    }
+ 
+    public static Set<Constructor<?>> findConstructors(Class<?> self) {
+        Set<Constructor<?>> results = new HashSet<>();
+        for (Constructor<?> e : self.getConstructors())
+            results.add(e);
+        return results;
+    }
+
+    public static Set<Method> findMethods(Object self, String name) {
+        Set<Method> results = new HashSet<>();
+        for (Method e : self.getClass().getMethods())
+            if ((e.getModifiers() & Modifier.STATIC) == 0 && e.getName().equals(name))
+                results.add(e);
+        if (self instanceof Class)
+            for (Method e : ((Class<?>)self).getMethods())
+                if (e.getName().equals(name))
+                    results.add(e);
+        return results;
     }
 
 }

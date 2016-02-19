@@ -1,10 +1,11 @@
 package com.github.saka1029.obscure.core;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +66,66 @@ public class Global {
     public static void defineGlobalEnv(String key, Object value) {
         ENV.define(sym(key), value);
     }
+    
+    public static final Class<?>[] APPLICABLE_ARGS_TYPES = { Object.class, List.class, Env.class };
+    public static final Class<?>[] PROCEDURE_ARGS_TYPES = { Object.class, List.class };
+    public static final Class<?>[] MACRO_ARGS_TYPES = { List.class };
+
+    public static void defineGlobalEnv(Class<?> cls) {
+        for (Field f : cls.getFields()) {
+            if ((f.getModifiers() & Modifier.STATIC) == 0) continue;
+            String name = f.getName();
+            ObscureName n = f.getAnnotation(ObscureName.class);
+            if (n != null && n.value() != null)
+                name = n.value();
+            try {
+                defineGlobalEnv(name, f.get(null));
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                new ObscureException(e);
+            }
+        }
+        for (Method m : cls.getMethods()) {
+            if ((m.getModifiers() & Modifier.STATIC) == 0) continue;
+            String name = m.getName();
+            ObscureName n = m.getAnnotation(ObscureName.class);
+            if (n != null && n.value() != null)
+                name = n.value();
+            Class<?>[] parms = m.getParameterTypes();
+            Applicable value = null;
+            if (Arrays.equals(parms, APPLICABLE_ARGS_TYPES))
+                value = (Applicable)(self, args, env) -> {
+                    try {
+                        return m.invoke(null, self, args, env);
+                    } catch (IllegalAccessException
+                            | IllegalArgumentException
+                            | InvocationTargetException e) {
+                        throw new ObscureException(e);
+                    }
+                };
+            else if (Arrays.equals(parms, PROCEDURE_ARGS_TYPES))
+                value = (Procedure)(self, args) -> {
+                    try {
+                        return m.invoke(null, self, args);
+                    } catch (IllegalAccessException
+                            | IllegalArgumentException
+                            | InvocationTargetException e) {
+                        throw new ObscureException(e);
+                    }
+                };
+            else if (Arrays.equals(parms, MACRO_ARGS_TYPES))
+                value = (Macro)(args) -> {
+                    try {
+                        return m.invoke(null, args);
+                    } catch (IllegalAccessException
+                            | IllegalArgumentException
+                            | InvocationTargetException e) {
+                        throw new ObscureException(e);
+                    }
+                };
+            if (value != null)
+                defineGlobalEnv(name, value);
+        }
+    }
 
     public static final Map<Symbol, Map<Class<?>, Object>> CLASS_ENV = new HashMap<>();
     
@@ -73,8 +134,8 @@ public class Global {
     }
     
     public static Object getClassEnv(Class<?> cls, Symbol symbol) {
-        if (cls.isArray())
-            cls = Object[].class;
+//        if (cls.isArray())
+//            cls = Object[].class;
         Map<Class<?>, Object> methodEnv = CLASS_ENV.get(symbol);
         if (methodEnv == null) return null;
         Object value = methodEnv.get(cls);
@@ -89,7 +150,7 @@ public class Global {
             value = methodEnv.get(c);
             if (value != null) return value;
         }
-        return null;
+        return Reflection.NOT_FOUND;
     }
     
     public static void defineClassEnv(Class<?> extender) {
@@ -99,89 +160,43 @@ public class Global {
             Parameter[] p = m.getParameters();
             if (p.length < 1) continue;
             Class<?> clas = p[0].getType();
+//            MethodClass c = m.getAnnotation(MethodClass.class);
+//            if (c != null && c.value() != null)
+//                clas = c.value();
             if (clas.isPrimitive())
                 clas = Reflection.getPrimitive(clas);
             String name = m.getName();
-            Annotation a = m.getAnnotation(MethodName.class);
-            if (a != null) {
-                String value = ((MethodName)a).value();
-                if (value != null && value.length() > 0)
-                    name = value;
-            }
+            ObscureName n = m.getAnnotation(ObscureName.class);
+            if (n != null && n.value() != null)
+                name = n.value();
             Map<Class<?>, Object> map = CLASS_ENV.computeIfAbsent(sym(name), k -> new HashMap<>());
-            Object value = map.computeIfAbsent(clas, k -> new MethodProcedure());
-            if (!(value instanceof MethodProcedure))
+            Object value = map.computeIfAbsent(clas, k -> new StaticMethodProcedure());
+            if (!(value instanceof StaticMethodProcedure))
                 throw new ObscureException("class %s name %s is not procedure", clas, name);
 //            System.out.println(clas + ":" + m);
-            ((MethodProcedure)value).add(m);
+            ((StaticMethodProcedure)value).add(m);
         }
     }
 
+    static Class<?> commonSuperClass(List list) {
+        Class<?> common = null;
+        for (Object e : list)
+            if (e != null)
+                if (common == null)
+                    common = e.getClass();
+                else
+                    while (!common.isAssignableFrom(e.getClass()))
+                        common = common.getSuperclass();
+        if (common == null)
+            common = Object.class;
+        return common;
+    }
+
     static {
-        defineGlobalEnv("exit", Reader.EOF_OBJECT);
-        defineGlobalEnv("Class", Class.class);
-        defineGlobalEnv("Integer", Integer.class);
-        defineGlobalEnv("int", Integer.TYPE);
-        defineGlobalEnv("car", (Procedure)(self, args) -> car(car(args)));
-        defineGlobalEnv("cdr", (Procedure)(self, args) -> cdr(car(args)));
-        defineGlobalEnv("cons", (Procedure)(self, args) -> cons(car(args), cadr(args)));
-        defineGlobalEnv("null?", (Procedure)(self, args) -> car(args) == Nil.VALUE);
-        defineGlobalEnv("if", (Applicable)(self, args, env) -> (boolean)eval(car(args), env) ? eval(cadr(args), env) : eval(caddr(args), env));
-        defineGlobalEnv("define", (Applicable)(self, args, env) -> {
-            Object parms = car(args);
-            if (parms instanceof Symbol)
-                return env.define((Symbol)parms, eval(cadr(args), env));  
-            else if (parms instanceof List)
-                return env.define((Symbol)car(parms), Closure.of((List)cdr(parms), (List)cdr(args), env));
-            else
-                throw new ObscureException("cannot define %s", args);
-        });
-        defineGlobalEnv("import", (Applicable)(self, args, env) -> {
-            try {
-                if (((List)args).size() == 2) {
-                    String name = (String)eval(cadr(args), env);
-                    return env.define((Symbol)car(args), Class.forName(name));
-                } else {
-                    String name = (String)eval(car(args), env);
-                    return env.define(sym(name.replaceFirst("^.*\\.", "")), Class.forName(name));
-                }
-            } catch (ClassNotFoundException e) {
-                throw new ObscureException(e);
-            }
-        });
-        defineGlobalEnv("lambda", (Applicable)(self, args, env) -> Closure.of((List)car(args), (List)cdr(args), env));
-        defineGlobalEnv("let", (Macro)(args) -> {
-            Pair.Builder parms = Pair.builder();
-            Pair.Builder actual = Pair.builder();
-            for (Object e : (List)car(args)) {
-                parms.tail(car(e));
-                actual.tail(cadr(e));
-            }
-            return cons(cons(sym("lambda"), cons(parms.build(), cdr(args))), actual.build());
-        });
-        defineGlobalEnv("quote", (Applicable)(self, args, env) -> car(args));
-        defineGlobalEnv("+", new GenericOperator(sym("+")));
-        defineGlobalEnv("-", new GenericOperator(sym("-")));
-        defineGlobalEnv("*", new GenericOperator(sym("*")));
-        defineGlobalEnv("<", new CompareOperator(sym("<0")));
-        defineGlobalEnv("<=", new CompareOperator(sym("<=0")));
-        defineGlobalEnv(">", new CompareOperator(sym(">0")));
-        defineGlobalEnv(">=", new CompareOperator(sym(">=0")));
-        defineGlobalEnv("<>", new CompareOperator(sym("<>0")));
-        defineGlobalEnv("==", new CompareOperator(sym("==0")));
-        defineGlobalEnv("print", (Macro)(args) -> list(car(args), list(sym("print"))));
-        defineGlobalEnv("array", (Procedure)(self, args) -> Reflection.method(Array.class, "newInstance", args.toArray()));
-    
+        defineGlobalEnv(StandardGlobal.class);
         defineClassEnv(StandardExtender.class);
         defineClassEnv(Integer.class);
-        defineClassEnv(Object[].class, "get", (Procedure)(self, args) -> Array.get(self, (int)car(args)));
-        defineClassEnv(Object[].class, "set", (Procedure)(self, args) -> {
-            Object value = cadr(args);
-            Array.set(self, (int)car(args), value);
-            return value;
-        });
-        defineClassEnv(Object[].class, "length", (Procedure)(self, args) -> Array.getLength(self));
-        defineClassEnv(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
+//        defineClassEnv(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
     }
     
     public static Object car(Object obj) {

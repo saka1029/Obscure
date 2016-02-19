@@ -10,7 +10,7 @@ public abstract class List implements Evalable, Invokable, Iterable<Object> {
 
     public int size() {
         int size = 0;
-        for (List e = this; e instanceof Pair; e = (List)e.cdr())
+        for (Object e = this; e instanceof Pair; e = ((Pair)e).cdr)
             ++size;
         return size;
     }

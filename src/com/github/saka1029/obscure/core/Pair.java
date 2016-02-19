@@ -1,6 +1,9 @@
 package com.github.saka1029.obscure.core;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Set;
 
 public class Pair extends List {
 
@@ -28,14 +31,24 @@ public class Pair extends List {
         if (!(car instanceof Symbol))
             throw new ObscureException("cannto eval %s", this);
         Symbol symbol = (Symbol)car;
-        Applicable method;
-        Object value = Global.getClassEnv(self.getClass(), symbol);
-        if (value instanceof Applicable)
-            method = (Applicable)value;
-        else if (symbol == Symbol.of("new"))
-            method = (Procedure)(s, args) -> Reflection.constructor(s, args.toArray());
-        else
-            method = (Procedure)(s, args) -> Reflection.method(s, symbol.name, args.toArray());
+        String name = symbol.name;
+        Applicable method = null;
+        if (symbol == Symbol.of("new")) {
+            Set<Constructor<?>> constructors = Reflection.findConstructors((Class<?>)self);
+            if (constructors.size() > 0)
+                method = new ConstructorProcedure(constructors);
+        } else {
+            Set<Method> methods = Reflection.findMethods(self, name);
+            if (methods.size() > 0)
+                method = new MethodProcedure(methods);
+        }
+        if (method == null) {
+            Object value = Global.getClassEnv(self.getClass(), symbol);
+            if (value instanceof Applicable)
+                method = (Applicable)value;
+        }
+        if (method == null)
+            throw new ObscureException("%s does not have method %s", self, symbol);
         Object result = method.apply(self, (List)cdr, env);
         if (result == Reflection.NOT_FOUND)
             throw new ObscureException("%s does not have method %s", self, symbol);

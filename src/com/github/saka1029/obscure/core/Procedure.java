@@ -4,7 +4,7 @@ public interface Procedure extends Applicable {
 
     Object apply(Object self, List args);
 
-    static List evlis(List args, Env env) {
+    public static List evlis(List args, Env env) {
         Pair.Builder b = Pair.builder();
         for (Object e : args)
             b.tail(Global.eval(e, env));

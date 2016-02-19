@@ -20,7 +20,7 @@ public class Closure1 extends Closure implements
         UnaryOperator<Object>,
         IntUnaryOperator, LongUnaryOperator {
 
-    protected Closure1(List parms, List body, Env env) {
+    protected Closure1(Object parms, List body, Env env) {
         super(parms, body, env);
     }
 

@@ -6,31 +6,42 @@ import java.util.function.Supplier;
 
 public class Closure implements Procedure, Supplier<Object> {
  
-    final List parms;
+    final Object parms;
     final List body;
     final Env env;
 
-    protected Closure(List parms, List body, Env env) {
+    protected Closure(Object parms, List body, Env env) {
         this.parms = parms;
         this.body = body;
         this.env = env;
     }
     
-    public static Closure of(List parms, List body, Env env) {
-        switch (parms.size()) {
-            case 1: return new Closure1(parms, body, env);
-            case 2: return new Closure2(parms, body, env);
-            default: return new Closure(parms, body, env);
-        }
+    public static Closure of(Object parms, List body, Env env) {
+        if (parms instanceof List) {
+            switch (asList(parms).size()) {
+                case 1: return new Closure1(parms, body, env);
+                case 2: return new Closure2(parms, body, env);
+                default: return new Closure(parms, body, env);
+            }
+        } else
+                return new Closure(parms, body, env);
     }
     
-    static Env pairlis(List parms, List args, Env env) {
+    static Env pairlis(Object parms, List args, Env env) {
         Env n = Env.create(env);
+        Object p = parms;
         Object a = args;
-        for (Object p : parms) {
-            n.define((Symbol)p, car(a));
+        while (p instanceof Pair) {
+            n.define((Symbol)car(p), car(a));
+            p = cdr(p);
             a = cdr(a);
         }
+        if (!(p instanceof Nil))
+            n.define((Symbol)p, a);
+//        for (Object p : parms) {
+//            n.define((Symbol)p, car(a));
+//            a = cdr(a);
+//        }
         return n;
     }
 

@@ -22,8 +22,10 @@ public class ObscureCommand implements CommandProcessor {
                     writer.write(print(x) + "\n");
                     writer.flush();
                 } catch (Exception e) {
+//                    e.printStackTrace();
                     error.write(e.getMessage() + "\n");
                     error.flush();
+                    INDENT = 0;
                 }
             }
         } catch (IOException e) {
