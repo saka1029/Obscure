@@ -35,13 +35,13 @@ public class TestArray {
         assertTrue(Object[].class.isAssignableFrom(Integer[].class));
     }
 
-//    @Test
-//    public void testIntArray() {
-//        assertArrayEquals(new int[] {0, 0}, (int[])eval(read("(define a (Array (newInstance int 2)))"), env));
-//        eval(read("(Array (set a 0 100))"), env);
-//        eval(read("(Array (set a 1 200))"), env);
-//        assertArrayEquals(new int[] {100, 200}, (int[])eval(read("a"), env));
-//    }
+    @Test
+    public void testIntArray() {
+        assertArrayEquals(new int[] {0, 0}, (int[])eval(read("(define a (Array (newInstance int 2)))"), env));
+        eval(read("(Array (set a 0 100))"), env);
+        eval(read("(Array (set a 1 200))"), env);
+        assertArrayEquals(new int[] {100, 200}, (int[])eval(read("a"), env));
+    }
 
 //    @Test
 //    public void testIntArrayProcedure() {
@@ -93,15 +93,16 @@ public class TestArray {
         assertArrayEquals(new int[][] {{100, 200}, {0, 0}}, (int[][])eval(read("a"), env));
         assertEquals(100, eval(read("(a (get 0) (get 0))"), env));
         assertEquals(201, eval(read("(a (get 0) (get 1) (+ 1))"), env));
+        assertEquals(300, eval(read("(a (set 1 0 300))"), env));
+        assertEquals(400, eval(read("(a (set 1 1 400))"), env));
+        assertArrayEquals(new int[][] {{100, 200}, {300, 400}}, (int[][])eval(read("a"), env));
     }
     
     @Test
     public void testArrayWithValues() {
         assertArrayEquals(new int[] {0, 1, 2, 3}, (int[])eval(read("(define a (array int 0 1 2 3))"), env));
         assertArrayEquals(new int[][] {{0, 1}, {2, 3}}, (int[][])eval(read(
-            "(define a (array (Class (forName \"[I\"))"
-            + " (array int 0 1)"
-            + " (array int 2 3)))"), env));
+            "(define a (array (array int 0 1) (array int 2 3)))"), env));
     }
 
     @Test

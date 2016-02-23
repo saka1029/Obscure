@@ -34,7 +34,7 @@ public class MapEnv implements Env {
         } else if (parent != null)
             return parent.set(key, value);
         else
-            throw new ObscureException("cannot set %s = %s", key, value);
+            throw new ObscureException("symbol '%s' not defined", key);
     }
     
 }

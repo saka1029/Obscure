@@ -194,7 +194,7 @@ public class Global {
 
     static {
         defineGlobalEnv(StandardGlobal.class);
-        defineClassEnv(StandardExtender.class);
+        defineClassEnv(StandardMethods.class);
         defineClassEnv(Integer.class);
 //        defineClassEnv(Boolean.class, "if", (Applicable)(self, args, env) -> (boolean)self ? eval(car(args), env) : eval(cadr(args), env));
     }

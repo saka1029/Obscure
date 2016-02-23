@@ -4,13 +4,28 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-public class StandardExtender {
+public class StandardMethods {
     
-    private StandardExtender() {}
+    private StandardMethods() {}
     
     // array
-    public static Object set(Object array, int index, Object value) { Object r = value; Array.set(array, index, value); return r;}
-    public static Object get(Object array, int index) { return Array.get(array, index); }
+    public static Object set(Object array, Object... indexesValue) {
+        int length = indexesValue.length;
+        if (length < 2)
+            throw new ObscureException("too few arguments: " + Arrays.toString(indexesValue));
+        for (int i = 0, max = length - 2; i < max; ++i)
+            array = Array.get(array, (int)indexesValue[i]);
+        Object value = indexesValue[length - 1];
+        Array.set(array, (int)indexesValue[length - 2], value);
+        return value;
+    }
+
+    public static Object get(Object array, int... indexes) {
+        for (int index : indexes)
+            array = Array.get(array, index);
+        return array;
+    }
+
     public static int length(Object array) { return Array.getLength(array); }
     public static String print(Object object) {
         if (object == null)

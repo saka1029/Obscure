@@ -12,6 +12,7 @@ public class StandardGlobal {
     @ObscureName("Class")public static final Object CLASS = Class.class;
     @ObscureName("Integer") public static final Object INTEGER = Integer.class;
     @ObscureName("String") public static final Object STRING = String.class;
+    @ObscureName("Array") public static final Object ARRAY = Array.class;
     @ObscureName("int") public static final Object INT = Integer.TYPE;
     @ObscureName("car") public static Object car0(Object self, List args) { return car(car(args)); }
     @ObscureName("cdr") public static Object cdr0(Object self, List args) { return cdr(car(args)); }
@@ -29,6 +30,16 @@ public class StandardGlobal {
             return env.define((Symbol)car(parms), Closure.of(cdr(parms), (List)cdr(args), env));
         else
             throw new ObscureException("cannot define %s", args);
+    }
+    @ObscureName("set") public static Object set(Object self, List args, Env env) {
+        Object parms = car(args);
+        if (parms instanceof Symbol)
+            return env.set((Symbol)parms, eval(cadr(args), env));  
+        else if (parms instanceof List)
+            // (define (list . x) x)
+            return env.set((Symbol)car(parms), Closure.of(cdr(parms), (List)cdr(args), env));
+        else
+            throw new ObscureException("cannot set %s", args);
     }
     @ObscureName("import") public static Object import0(Object self, List args, Env env) {
         try {
