@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.saka1029.obscure.core.Env;
+import com.github.saka1029.obscure.core.ObscureException;
 
 import static com.github.saka1029.obscure.core.Global.*;
 import com.github.saka1029.obscure.core.Procedure;
@@ -26,26 +27,26 @@ public class TestCast {
         defineGlobalEnv("double", Double.class);
         defineGlobalEnv("Object", Object.class);
         defineGlobalEnv("BigInteger", BigInteger.class);
-        defineGlobalEnv("cast", (Procedure)(self, args) -> {
-            Class<?> cls = (Class<?>)car(args);
-            Object obj = car(cdr(args));
-            if (cls == Integer.class)
-                return ((Number)obj).intValue();
-            else if (cls == Long.class)
-                return ((Number)obj).longValue();
-            else if (cls == Short.class)
-                return ((Number)obj).shortValue();
-            else if (cls == Double.class)
-                return ((Number)obj).doubleValue();
-            else if (cls == Byte.class)
-                return ((Number)obj).byteValue();
-            else if (cls == Character.class)
-                return (char)((Number)obj).intValue();
-            else if (cls == BigInteger.class)
-                return BigInteger.valueOf(((Number)obj).longValue());
-            else
-                return cls.cast(car(cdr(args)));
-        });
+//        defineGlobalEnv("cast", (Procedure)(self, args) -> {
+//            Class<?> cls = (Class<?>)car(args);
+//            Object obj = car(cdr(args));
+//            if (cls == Integer.class)
+//                return ((Number)obj).intValue();
+//            else if (cls == Long.class)
+//                return ((Number)obj).longValue();
+//            else if (cls == Short.class)
+//                return ((Number)obj).shortValue();
+//            else if (cls == Double.class)
+//                return ((Number)obj).doubleValue();
+//            else if (cls == Byte.class)
+//                return ((Number)obj).byteValue();
+//            else if (cls == Character.class)
+//                return (char)((Number)obj).intValue();
+//            else if (cls == BigInteger.class)
+//                return BigInteger.valueOf(((Number)obj).longValue());
+//            else
+//                return cls.cast(car(cdr(args)));
+//        });
         defineGlobalEnv("asInt", (Procedure)(self, args) -> ((Number)car(args)).intValue());
 
         defineClassEnv(Double.class, "int", (Procedure)(self, args) -> ((Number)self).intValue());
@@ -84,7 +85,7 @@ public class TestCast {
         assertEquals((Object)"123", eval(read("(cast Object \"123\")"), env));
     }
     
-    @Test(expected = ClassCastException.class)
+    @Test(expected = ObscureException.class)
     public void testNumberError() {
         assertEquals(123D, eval(read("(cast double \"123\")"), env));
     }

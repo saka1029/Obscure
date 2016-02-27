@@ -1,6 +1,8 @@
 package com.github.saka1029.obscure.core;
 
 import java.lang.reflect.Array;
+import java.math.BigInteger;
+
 import static com.github.saka1029.obscure.core.Global.*;
 
 public class StandardGlobal {
@@ -116,6 +118,27 @@ public class StandardGlobal {
         for (Object e : args)
             Array.set(array, i++, e);
         return array;
+    }
+    
+    @ObscureName("cast") public static Object cast(Object self, List args) {
+        Class<?> cls = (Class<?>)car(args);
+        Object obj = car(cdr(args));
+        if (cls == Integer.class)
+            return ((Number)obj).intValue();
+        else if (cls == Long.class)
+            return ((Number)obj).longValue();
+        else if (cls == Short.class)
+            return ((Number)obj).shortValue();
+        else if (cls == Double.class)
+            return ((Number)obj).doubleValue();
+        else if (cls == Byte.class)
+            return ((Number)obj).byteValue();
+        else if (cls == Character.class)
+            return (char)((Number)obj).intValue();
+        else if (cls == BigInteger.class)
+            return BigInteger.valueOf(((Number)obj).longValue());
+        else
+            return cls.cast(car(cdr(args))); 
     }
 
 }
