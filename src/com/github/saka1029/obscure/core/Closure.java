@@ -4,7 +4,8 @@ import static com.github.saka1029.obscure.core.Global.*;
 
 import java.util.function.Supplier;
 
-public class Closure implements Procedure, Supplier<Object> {
+public class Closure implements Procedure {
+//public class Closure implements Procedure, Supplier<Object> {
  
     final Object parms;
     final List body;
@@ -17,13 +18,13 @@ public class Closure implements Procedure, Supplier<Object> {
     }
     
     public static Closure of(Object parms, List body, Env env) {
-        if (parms instanceof List) {
-            switch (asList(parms).size()) {
-                case 1: return new Closure1(parms, body, env);
-                case 2: return new Closure2(parms, body, env);
-                default: return new Closure(parms, body, env);
-            }
-        } else
+//        if (parms instanceof List) {
+//            switch (asList(parms).size()) {
+//                case 1: return new Closure1(parms, body, env);
+//                case 2: return new Closure2(parms, body, env);
+//                default: return new Closure(parms, body, env);
+//            }
+//        } else
                 return new Closure(parms, body, env);
     }
     
@@ -59,9 +60,9 @@ public class Closure implements Procedure, Supplier<Object> {
         return String.format("(closure %s %s)", print(parms), print(body));
     }
 
-    @Override
-    public Object get() {
-        return apply(null, list());
-    }
+//    @Override
+//    public Object get() {
+//        return apply(null, list());
+//    }
 
 }

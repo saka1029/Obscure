@@ -34,6 +34,10 @@ public class TestStream {
             "(IntStream"
             + " (of 1 2 3)"
             + " (toArray))"), env));
+    }
+    
+    @Test
+    public void testMap() {
         assertArrayEquals(new int[]{2, 3, 4}, (int[])eval(read(
             "(IntStream"
             + " (of 1 2 3)"
@@ -89,6 +93,14 @@ public class TestStream {
             + " (of 1 2 3)"
             + " (filter ((lambda (x) (< x 3)) (negate)))"
             + " (toArray))"), env));
+    }
+
+    @Test
+    public void testReduce() {
+        assertEquals(6, eval(read(
+            "(IntStream"
+            + " (of 1 2 3)"
+            + " (reduce 0 (lambda (x y) (+ x y)))  )"), env));
     }
 
 }

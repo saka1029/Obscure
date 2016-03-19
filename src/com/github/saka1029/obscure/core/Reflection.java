@@ -4,10 +4,12 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -64,13 +66,76 @@ public class Reflection {
         put(Void.TYPE, Void.class);
     }
 
-    public static boolean isAssignable(Class<?> parmType, Object arg) {
+    private static class Handler implements InvocationHandler {
+        
+        private final Method method;
+        private final Closure closure;
+        
+        Handler(Method method, Closure closure) {
+            this.closure = closure;
+            this.method = method;
+        }
+
+        @Override
+        public Object invoke(Object self, Method method, Object[] args) throws Throwable {
+//            System.out.printf("%s invoked by %s%n", this, method.getName());
+            if (!method.equals(this.method))
+                return null;
+            if (args == null)
+                args = new Object[0];
+            return closure.apply(self, Pair.list(args));
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("Handler(%s)", closure);
+        }
+    }
+
+    private static Object proxy(Class<?> type, Closure closure) {
+        Method method = null;
+        for (Method e : type.getDeclaredMethods())
+            if ((e.getModifiers() & Modifier.ABSTRACT) != 0)
+                if (method == null)
+                    method = e;
+                else
+                    throw new IllegalArgumentException(
+                        "type (" + type +") has too many abstract methods.");
+        if (method == null)
+            throw new IllegalArgumentException(
+                "type (" + type +") has no abstract method");
+        return Proxy.newProxyInstance(
+            closure.getClass().getClassLoader(),
+            new Class<?>[] {type},
+            new Handler(method, closure));
+    }
+
+    private static final Object NOT_ASSIGNABLE = new Object() {
+        public String toString() { return "NOT_ASSIGNABLE"; }
+    };
+    
+    public static Object assignableValue(Class<?> parmType, Object arg) {
+        Object result;
         if (parmType.isPrimitive()) {
             if (arg == null || !PRIMITIVES.get(parmType).isInstance(arg))
-                return false;
-        } else if (arg != null && !parmType.isInstance(arg))
-            return false;
-        return true;
+                result = NOT_ASSIGNABLE;
+            else
+                result = arg;
+        } else if (arg == null) {
+            result = null;
+        } else if (parmType.isInterface() && arg instanceof Closure) {
+//            System.out.println(parmType + " <- " + arg);
+            if (parmType.isAssignableFrom(arg.getClass())) {
+//                System.out.println("is implements " + parmType);
+                result = arg;
+            } else
+                result = proxy(parmType, (Closure)arg);
+        } else if (!parmType.isInstance(arg)) {
+            result = NOT_ASSIGNABLE;
+        } else
+            result = arg;
+//        System.out.printf("assignableValue: %s, %s -> %s%n", parmType, arg, result);
+        return result;
     }
 
     private static Object[] actualArgumentsVarArgs(Executable e, Object... args) {
@@ -92,18 +157,18 @@ public class Reflection {
                     Class<?> ctype = type.getComponentType();
                     Object vars = Array.newInstance(ctype, varSize);
                     for (int j = 0; j < varSize; ++j) {
-                        Object arg = args[i + j];
-                        if (!isAssignable(ctype, arg))
+                        Object assignable = assignableValue(ctype, args[i + j]);
+                        if (assignable == NOT_ASSIGNABLE)
                             return null;
-                        Array.set(vars, j, arg);
+                        Array.set(vars, j, assignable);
                     }
                     actual[i] = vars;
                 }
             } else {
-                Object arg = args[i];
-                if (!isAssignable(type, arg))
+                Object assignable = assignableValue(type, args[i]);
+                if (assignable == NOT_ASSIGNABLE)
                     return null;
-                actual[i] = arg;
+                actual[i] = assignable;
             }
         }
         return actual;
@@ -116,11 +181,12 @@ public class Reflection {
             return null;
         Object[] actual = new Object[argsSize];
         Class<?>[] parmType = e.getParameterTypes();
-        for (int i = 0; i < parmSize; ++i)
-            if (!isAssignable(parmType[i], args[i]))
+        for (int i = 0; i < parmSize; ++i) {
+            Object assignable = assignableValue(parmType[i], args[i]);
+            if (assignable == NOT_ASSIGNABLE)
                 return null;
-            else
-                actual[i] = args[i];
+            actual[i] = assignable;
+        }
         return actual;
     }
 

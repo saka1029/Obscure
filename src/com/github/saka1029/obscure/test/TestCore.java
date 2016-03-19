@@ -14,6 +14,10 @@ public class TestCore {
     @Test
     public void testClass() {
         assertEquals(String.class, eval(read("(Class (forName \"java.lang.String\"))"), env));
+    }
+    
+    @Test
+    public void testFormat() {
         assertEquals("a0123", eval(read("(Class (forName \"java.lang.String\") (format \"a%04d\" 123))"), env));
     }
 
