@@ -21,6 +21,7 @@ public class TestInteger {
         assertEquals(255, eval(read("(\"0xff\" (decode))"), env));
         assertEquals(12345D, eval(read("(12345 (doubleValue))"), env));
         assertEquals(255, eval(read("(255 (* 256) (* 256) (* 256) (reverse))"), env));
+        assertEquals(255, eval(read("((* 255 256 256 256) (reverse))"), env));
     }
    
 }

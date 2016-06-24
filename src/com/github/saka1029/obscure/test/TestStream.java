@@ -99,7 +99,8 @@ public class TestStream {
     public void testReduce() {
         assertEquals(6, eval(read(
             "(IntStream"
-            + " (of 1 2 3)"
+            + " (range 1 4)"
+//            + " (of 1 2 3)"
             + " (reduce 0 (lambda (x y) (+ x y)))  )"), env));
     }
 
