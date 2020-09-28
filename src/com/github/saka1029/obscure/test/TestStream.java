@@ -104,4 +104,18 @@ public class TestStream {
             + " (reduce 0 (lambda (x y) (+ x y)))  )"), env));
     }
 
+    /*
+     * Comparatorの抽象メソッドはcompareの他にequalsがある。
+     * いずれかを特定できないのでエラーとなる。
+     */
+    @Ignore
+    @Test
+    public void testSort() {
+        assertArrayEquals(new int[] {3, 2, 1}, (int[])eval(read(
+            "(IntStream"
+            + " (range 1 4)"
+            + " (sorted (lambda (x y) (- y x)))"
+            + " (toArray) )"), env));
+    }
+
 }

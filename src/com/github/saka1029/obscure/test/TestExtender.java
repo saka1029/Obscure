@@ -1,13 +1,6 @@
 package com.github.saka1029.obscure.test;
 
-import static org.junit.Assert.*;
-
-import java.math.BigInteger;
-
-import org.junit.Test;
-
 import com.github.saka1029.obscure.core.Env;
-import static com.github.saka1029.obscure.core.Global.*;
 
 public class TestExtender {
 
